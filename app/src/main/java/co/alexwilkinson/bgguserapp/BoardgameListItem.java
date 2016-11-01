@@ -10,10 +10,10 @@ public class BoardgameListItem {
     public String image;
     public String gameID;
 
-    BoardgameListItem(String title, String description, String image, String gameID){
+    BoardgameListItem(String title, String description, String gameID){
         this.title = title;
         this.description = description;
-        this.image = image;
+//        this.image = image;
         this.gameID = gameID;
     }
 }

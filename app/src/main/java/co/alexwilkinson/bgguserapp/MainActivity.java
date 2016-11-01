@@ -11,6 +11,7 @@ import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     ListView lvCollection;
     MyListAdapter myadapter;
     Button buBgg;
+    int userTotal;
 
     ArrayList<String> gameNames;
 
@@ -54,15 +56,11 @@ public class MainActivity extends AppCompatActivity {
     public void buSearch(View view) {
         String user = etFindUser.getText().toString();
         RetrieveFeed getGames = new RetrieveFeed(user);
-        try {
-            getGames.execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        gameNames = getGames.getGameList();
-        System.out.println(gameNames.toString());
+            //add .execute().get() to force the application to run now
+            getGames.execute();
+
+//        gameNames = getGames.getGameList();
+//        System.out.println(gameNames.toString());
     }
 
 
@@ -75,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return bgList.size();
+                return bgList.size();
+
         }
 
         @Override
@@ -137,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> name = new ArrayList<>();
         ArrayList<String> released = new ArrayList<>();
         ArrayList<String> gameID = new ArrayList<>();
-        ArrayList<String> image = new ArrayList<>();
+//        ArrayList<String> image = new ArrayList<>();
 
         public RetrieveFeed(String username){
             this.username = username;
@@ -167,7 +166,8 @@ public class MainActivity extends AppCompatActivity {
                 int eventType = xpp.getEventType();
 
                 //create a while loop to keep going until teh end of the XML document
-                while( eventType != XmlPullParser.END_DOCUMENT){
+//                while( eventType != XmlPullParser.END_DOCUMENT){
+                while(eventType != XmlPullParser.END_DOCUMENT){
                     if(eventType == XmlPullParser.START_TAG){
 
                         //check for name of the game using tage
@@ -183,70 +183,64 @@ public class MainActivity extends AppCompatActivity {
                             released.add(xpp.nextText());
                         }
                         //pull the thumnail tag
-                        else if(xpp.getName().equalsIgnoreCase("thumbnail")){
-                            image.add(xpp.nextText());
+//                        else if(xpp.getName().equalsIgnoreCase("thumbnail")){
+//                            image.add(xpp.nextText());
+//                        }
+                        else if(xpp.getName().equalsIgnoreCase("items")){
+                            userTotal = Integer.parseInt(xpp.getAttributeValue(0));
                         }
                         //check the status tag and namespaces within it
-                        else if(xpp.getName().equalsIgnoreCase("status")){
-                            System.out.println(
-                                    "namespace = " + xpp.getAttributeName(1) + " = " + xpp.getAttributeValue(1) +"\n" +
-                                            "namespace  = " + xpp.getAttributeName(0) + " = " + xpp.getAttributeValue(0)
+//                        else if(xpp.getName().equalsIgnoreCase("status")){
+//                            System.out.println(
+//                                    "namespace = " + xpp.getAttributeName(1) + " = " + xpp.getAttributeValue(1) +"\n" +
+//                                            "namespace  = " + xpp.getAttributeName(0) + " = " + xpp.getAttributeValue(0)
+//
+//                            );
+//
+//                        }
 
-                            );
-
-                        }
                     }
+                    //moves the XML to the next tag to parse
                     eventType = xpp.next();
                 }
+
+                //call the method to add the values to the main BoardgameList
+                bgList = addToGameList();
 
             }
             catch(Exception ex){
                 ex.getStackTrace();
             }
+
             return name;
         }
 
         /*
-        a lot of additional processing will happen here. The data from the XML will be taken and added
-        to the BoardgameListItem and then it will be pushed to the list view
+        postprocessing which will link the listview to the adapter created to display the content
+        A toast is also given to state how many items the user has in their list
          */
         @Override
         protected void onPostExecute(Object o) {
 
             if(name.size() !=0){
-                bgList = new ArrayList<>();
-                for(int i = 0; i<name.size();i++) {
-
-                    bgList.add(new BoardgameListItem(
-                            name.get(i),
-                            released.get(i),
-                            image.get(i),
-                            gameID.get(i)
-                    ));
-
-                }
-                System.out.println("data added to list");
 
                 myadapter = new MyListAdapter(bgList);
                 lvCollection.setAdapter(myadapter);
 
 
                 Toast.makeText(getApplicationContext(),
-                        etFindUser.getText().toString() + " has a Total of : " +name.size() +
+                        etFindUser.getText().toString() + " has a Total of : " +userTotal +
                                 " games on board game geek",
                         Toast.LENGTH_LONG).show();
 
             }
             else{
-                System.out.println("Error data could not be retrieved, check your connection and try" +
-                        "again");
+                Toast.makeText(getApplicationContext(),
+                        "Error data could not be retrieved, check username and connection, and try again",
+                        Toast.LENGTH_LONG).show();
+                etFindUser.setText("");
             }
 
-        }
-
-        @Override
-        protected void onProgressUpdate(Object[] values) {
-            super.onProgressUpdate(values);
         }
 
 
@@ -261,16 +255,30 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public ArrayList<String> getGameList(){
-            return name;
-        }
+        public ArrayList<String> getGameList(){return name;}
 
         public ArrayList<String> getDetailList(){
             return released;
         }
-        public ArrayList<String> getImageList(){
-            return image;
+
+        /*
+        Method to add all of the values to the BoardgameListItem to be displayed in the ListView
+         */
+        private ArrayList<BoardgameListItem> addToGameList(){
+            bgList = new ArrayList<>(name.size());
+            for(int i = 0; i<name.size();i++) {
+
+                bgList.add(new BoardgameListItem(
+                        name.get(i),
+                        released.get(i),
+                        gameID.get(i)
+                ));
+
+            }
+            System.out.println("data added to list");
+            return bgList;
         }
+
     }
 
 }
