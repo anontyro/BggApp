@@ -1,6 +1,8 @@
 package co.alexwilkinson.bgguserapp;
 
+import android.content.Intent;
 import android.database.CursorJoiner;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.renderscript.ScriptGroup;
 import android.support.v7.app.AppCompatActivity;
@@ -14,11 +16,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     EditText etFindUser;
     ListView lvCollection;
     MyListAdapter myadapter;
+    Button buBgg;
+
     ArrayList<String> gameNames;
 
     //title, description, image(String)
@@ -96,8 +102,18 @@ public class MainActivity extends AppCompatActivity {
             TextView tvDetails = (TextView)myView.findViewById(R.id.tvDetails);
             tvDetails.setText(adapterItem.description);
 
-            TextView tvImage = (TextView)myView.findViewById(R.id.tvImage);
-            tvImage.setText(adapterItem.image);
+//            TextView tvImage = (TextView)myView.findViewById(R.id.tvImage);
+//            tvImage.setText(adapterItem.image);
+
+            buBgg = (Button)myView.findViewById(R.id.buBgg);
+            buBgg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse("http://boardgamegeek.com/boardgame/" + adapterItem.gameID);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                }
+            });
 
             return myView;
         }
@@ -113,20 +129,20 @@ public class MainActivity extends AppCompatActivity {
      */
     public class RetrieveFeed extends AsyncTask{
 
-        String bgg = "https://www.boardgamegeek.com/xmlapi/";
-        String collection = "collection/";
+        String bgg = "http://www.boardgamegeek.com/xmlapi2/";
+        String collection = "collection?username=";
         String username = "";
         URL url;
-        String rawXML = "";
 
         ArrayList<String> name = new ArrayList<>();
         ArrayList<String> released = new ArrayList<>();
+        ArrayList<String> gameID = new ArrayList<>();
         ArrayList<String> image = new ArrayList<>();
 
         public RetrieveFeed(String username){
             this.username = username;
             try {
-                url = new URL(bgg + collection + username);
+                url = new URL(bgg + collection + username );
             }
             catch(Exception ex){
                 ex.getStackTrace();
@@ -137,28 +153,47 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Object doInBackground(Object[] objects) {
 
+            //create the controls to parse the XML using XmlPullParser
             try{
                 XmlPullParserFactory xmlFactory = XmlPullParserFactory.newInstance();
-                xmlFactory.setNamespaceAware(false);
+                xmlFactory.setNamespaceAware(true);
 
                 XmlPullParser xpp = xmlFactory.newPullParser();
 
+                //set the input url stream to use
                 xpp.setInput(getInputStream(url), "UTF_8");
 
-                rawXML = xpp.getText();
 
                 int eventType = xpp.getEventType();
+
+                //create a while loop to keep going until teh end of the XML document
                 while( eventType != XmlPullParser.END_DOCUMENT){
                     if(eventType == XmlPullParser.START_TAG){
 
+                        //check for name of the game using tage
                         if(xpp.getName().equalsIgnoreCase("name")){
                             name.add(xpp.nextText());
                         }
+                        //check for the board game ID in item namespace
+                        else if(xpp.getName().equalsIgnoreCase("item")){
+                            gameID.add(xpp.getAttributeValue(1));
+                        }
+                        //check the yearh published tag
                         else if(xpp.getName().equalsIgnoreCase("yearpublished")){
                             released.add(xpp.nextText());
                         }
+                        //pull the thumnail tag
                         else if(xpp.getName().equalsIgnoreCase("thumbnail")){
                             image.add(xpp.nextText());
+                        }
+                        //check the status tag and namespaces within it
+                        else if(xpp.getName().equalsIgnoreCase("status")){
+                            System.out.println(
+                                    "namespace = " + xpp.getAttributeName(1) + " = " + xpp.getAttributeValue(1) +"\n" +
+                                            "namespace  = " + xpp.getAttributeName(0) + " = " + xpp.getAttributeValue(0)
+
+                            );
+
                         }
                     }
                     eventType = xpp.next();
@@ -177,23 +212,29 @@ public class MainActivity extends AppCompatActivity {
          */
         @Override
         protected void onPostExecute(Object o) {
-            System.out.println(name.size());
-            System.out.println(name.toString());
-            System.out.println(released.toString());
-            System.out.println(image.toString());
 
             if(name.size() !=0){
                 bgList = new ArrayList<>();
                 for(int i = 0; i<name.size();i++) {
 
                     bgList.add(new BoardgameListItem(
-                            name.get(i), released.get(i),image.get(i)));
+                            name.get(i),
+                            released.get(i),
+                            image.get(i),
+                            gameID.get(i)
+                    ));
 
                 }
                 System.out.println("data added to list");
 
                 myadapter = new MyListAdapter(bgList);
                 lvCollection.setAdapter(myadapter);
+
+
+                Toast.makeText(getApplicationContext(),
+                        etFindUser.getText().toString() + " has a Total of : " +name.size() +
+                                " games on board game geek",
+                        Toast.LENGTH_LONG).show();
 
             }
             else{

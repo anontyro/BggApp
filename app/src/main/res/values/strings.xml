@@ -3,5 +3,7 @@
     <string name="user_lookup_hint">Enter a valid BGG username:</string>
     <string name="go_button">Go</string>
     <string name="button_save">Save</string>
+    <string name="button_save_user">Save User</string>
+
 
 </resources>
