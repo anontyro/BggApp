@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(),WebBrowserActivity.class);
                     intent.putExtra("boardgame",adapterItem.gameID);
+                    intent.putExtra("title",adapterItem.title);
                     startActivity(intent);
 //                    Uri uri = Uri.parse("http://boardgamegeek.com/boardgame/" + adapterItem.gameID);
 //                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);

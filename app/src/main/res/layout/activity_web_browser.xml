@@ -15,6 +15,11 @@
         android:layout_width="match_parent"
         android:id="@+id/webview_browser"
         android:layout_height="match_parent" />
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="100px"
+        android:layout_gravity="center"
+        android:layout_height="100px" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -33,13 +38,19 @@
             tools:ignore="UselessParent">
 
             <Button
+                android:background="@android:color/transparent"
                 android:id="@+id/button_close"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:onClick="buClose"
                 android:text="@string/button_close" />
 
+
+
         </LinearLayout>
+
+
     </FrameLayout>
 
 </FrameLayout>

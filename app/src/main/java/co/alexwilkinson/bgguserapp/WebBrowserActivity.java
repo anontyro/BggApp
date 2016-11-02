@@ -11,14 +11,16 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
 public class WebBrowserActivity extends AppCompatActivity {
+    private ProgressBar progressBar;
     public WebView wbBrowser;
-    String url = "";
+    public String url = "";
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -90,22 +92,34 @@ public class WebBrowserActivity extends AppCompatActivity {
         }
     };
 
+    /*
+    code that runs to create the web browser instance
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_browser);
-        wbBrowser = (WebView)findViewById(R.id.webview_browser);
+        wbBrowser = (WebView)findViewById(R.id.webview_browser); //create WebView object
 
+        //give the webview object setttings
         wbBrowser.getSettings().setJavaScriptEnabled(true);
         wbBrowser.getSettings().setLoadWithOverviewMode(true);
+        wbBrowser.getSettings().getDomStorageEnabled();
         wbBrowser.getSettings().setUseWideViewPort(true);
 
-        Bundle b = getIntent().getExtras();
-        url = "http://boardgamegeek.com/boardgame/" + b.getString("boardgame");
-        System.out.println(url);
-//        this.getActionBar().setTitle("boardgamegeek");
+        //setup the bundle of data sent from the main list activity to allow the correct pages to be viewed
+        Bundle b = getIntent().getExtras(); //create the bundle
+        setTitle("The Geek: "+b.getString("title")); //set window title
+        url = "http://boardgamegeek.com/boardgame/" + b.getString("boardgame"); //url to go to
+
+        progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        progressBar.setMax(100);
+
+
+        //give the WebView a WebClientView to override the open external browser when navigating
         wbBrowser.setWebViewClient(new myWebView());
-        wbBrowser.loadUrl(url);
+        wbBrowser.loadUrl(url); //creates the webpage
+        WebBrowserActivity.this.progressBar.setProgress(0); //set the progress bar to 0
 
 
 
@@ -185,12 +199,23 @@ public class WebBrowserActivity extends AppCompatActivity {
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
+    //once button is pressed the browser will close and return to the previous activity
+    public void buClose(View view) {
+        finish();
+    }
+
     private class myWebView extends WebViewClient{
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            view.loadUrl(url);
+            view.loadUrl(url); //forces URL to load in the browser not external
             return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            progressBar.setVisibility(View.GONE); //once finished loading hide the progressbar
         }
     }
 }
