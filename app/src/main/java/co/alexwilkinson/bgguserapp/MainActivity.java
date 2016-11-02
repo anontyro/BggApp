@@ -37,8 +37,6 @@ public class MainActivity extends AppCompatActivity {
     Button buBgg;
     int userTotal;
 
-    ArrayList<String> gameNames;
-
     //title, description, image(String)
     public static ArrayList<BoardgameListItem> bgList = new ArrayList<>();
 
@@ -53,14 +51,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //search button that will check the bgg API and return the user
     public void buSearch(View view) {
         String user = etFindUser.getText().toString();
         RetrieveFeed getGames = new RetrieveFeed(user);
             //add .execute().get() to force the application to run now
             getGames.execute();
-
-//        gameNames = getGames.getGameList();
-//        System.out.println(gameNames.toString());
     }
 
 
@@ -108,9 +104,12 @@ public class MainActivity extends AppCompatActivity {
             buBgg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Uri uri = Uri.parse("http://boardgamegeek.com/boardgame/" + adapterItem.gameID);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    Intent intent = new Intent(getApplicationContext(),WebBrowserActivity.class);
+                    intent.putExtra("boardgame",adapterItem.gameID);
                     startActivity(intent);
+//                    Uri uri = Uri.parse("http://boardgamegeek.com/boardgame/" + adapterItem.gameID);
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+//                    startActivity(intent);
                 }
             });
 

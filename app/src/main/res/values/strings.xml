@@ -5,5 +5,8 @@
     <string name="button_save">Save</string>
     <string name="button_save_user">Save User</string>
 
+    <string name="title_activity_web_browser">WebBrowserActivity</string>
+    <string name="button_close">Close</string>
+
 
 </resources>
