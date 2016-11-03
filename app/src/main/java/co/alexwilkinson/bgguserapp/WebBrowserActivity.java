@@ -104,7 +104,7 @@ public class WebBrowserActivity extends AppCompatActivity {
         //give the webview object setttings
         wbBrowser.getSettings().setJavaScriptEnabled(true);
         wbBrowser.getSettings().setLoadWithOverviewMode(true);
-        wbBrowser.getSettings().getDomStorageEnabled();
+        wbBrowser.getSettings().setDomStorageEnabled(true);
         wbBrowser.getSettings().setUseWideViewPort(true);
 
         //setup the bundle of data sent from the main list activity to allow the correct pages to be viewed

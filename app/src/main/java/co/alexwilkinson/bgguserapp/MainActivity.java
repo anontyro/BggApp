@@ -59,7 +59,25 @@ public class MainActivity extends AppCompatActivity {
             getGames.execute();
     }
 
+    //button used to save the current user selected in the list, if no prime user exists then
+    //the button will throw a dialog to ask to add one and create the database
+    public void buSaveUser(View view) {
+        //check to see if database exists
+        if(DBManager.databaseExists() ==false){
+            //call dialog to get it created
+            CreateUserDialogFrame dialog = new CreateUserDialogFrame();
+            dialog.show;
 
+        }
+        else{
+            //if it exists do this
+        }
+    }
+
+    /**
+     * private inner class that is used to control and display the XML content in the ListView
+     * add all the items from the arraylist into the ListView
+     */
     private class MyListAdapter extends BaseAdapter{
         public ArrayList<BoardgameListItem>bgList;
 
@@ -117,8 +135,6 @@ public class MainActivity extends AppCompatActivity {
             return myView;
         }
     }
-
-
 
 
     /**

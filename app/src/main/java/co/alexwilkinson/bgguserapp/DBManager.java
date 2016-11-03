@@ -53,6 +53,25 @@ public class DBManager {
 
     }
 
+    //method that calls the database exists methods taking no parameters if looking for default
+    public static boolean databaseExists(){
+        return databaseExists("/data/data/co.alexwilkinson.bgguserapp/databases/BggApp");
+    }
+    //allows the user to add their own path if different
+    public static boolean databaseExists(String dbPath){
+        SQLiteDatabase dbTest = null;
+
+        try{
+            dbTest = SQLiteDatabase.openDatabase(dbPath,null,SQLiteDatabase.OPEN_READONLY);
+            dbTest.close();
+            System.out.println("Database does exists");
+        }
+        catch(Exception ex){
+            System.out.println("Database does not exist");
+        }
+        return dbTest != null;
+    }
+
     public long insertUser(ContentValues values){
         long id = sqlDB.insert(tableUsers,"",values);
 
