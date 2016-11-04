@@ -4,9 +4,18 @@
     <string name="go_button">Go</string>
     <string name="button_save">Save</string>
     <string name="button_save_user">Save User</string>
+    <string name="button_ok">ok</string>
+    <string name="button_cancel">cancel</string>
+
 
     <string name="title_activity_web_browser">GeekBrowser</string>
     <string name="button_close">Close</string>
+
+
+    <string name="dialog_title">Setup Main User</string>
+    <string name="dialog_body">Enter a valid user name below</string>
+
+
 
 
 </resources>

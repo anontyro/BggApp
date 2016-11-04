@@ -1,17 +1,16 @@
 package co.alexwilkinson.bgguserapp;
 
+import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.Intent;
-import android.database.CursorJoiner;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.renderscript.ScriptGroup;
+import android.provider.SyncStateContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Xml;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,14 +22,11 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
-import javax.xml.transform.Result;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements CreateUserDialogFrame.NoticeDialogListener, CreateUserDialogFrame.OnCompleteListener{
     EditText etFindUser;
     ListView lvCollection;
     MyListAdapter myadapter;
@@ -40,11 +36,16 @@ public class MainActivity extends AppCompatActivity {
     //title, description, image(String)
     public static ArrayList<BoardgameListItem> bgList = new ArrayList<>();
 
+    /**
+     * main method for creating the activity most operations revolve around this
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //setup the objects to be callable
         lvCollection = (ListView)findViewById(R.id.lvCollection);
         etFindUser = (EditText)findViewById(R.id.etFindUser);
 
@@ -63,15 +64,50 @@ public class MainActivity extends AppCompatActivity {
     //the button will throw a dialog to ask to add one and create the database
     public void buSaveUser(View view) {
         //check to see if database exists
-        if(DBManager.databaseExists() ==false){
-            //call dialog to get it created
-            CreateUserDialogFrame dialog = new CreateUserDialogFrame();
-            dialog.show;
-
+        if(DBManager.databaseExists() ==false){ //checks to see if the database exists
+            //steps needed to create and call the dialog window
+            FragmentManager fm = getFragmentManager();
+            CreateUserDialogFrame dialog;
+            //send the current username from the search box
+            dialog = CreateUserDialogFrame.setUsername(etFindUser.getText().toString());
+            dialog.show(fm, "addUser");
         }
         else{
-            //if it exists do this
+            //if it exists do this, probably add to the database
         }
+    }
+
+    /**
+     * Implemented from the CreateUserDialogFrame, event that is fired from the pressing of the
+     * positive button.
+     * @param dialog
+     */
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        Toast.makeText(this,"you chose wisely",Toast.LENGTH_LONG);
+        System.out.println("positive");
+    }
+
+    /**
+     * Implemented from the CreateUserDialogFrame, event that is fired from the pressing of the
+     * negative button.
+     * @param dialog
+     */
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        Toast.makeText(this,"you whose poorly",Toast.LENGTH_LONG);
+        System.out.println("negative");
+    }
+
+    /**
+     * Implemented from the CreateUserDialogFrame, event that is fired at the end of the dialog session
+     * these values are returned at the end.
+     * @param username
+     */
+    @Override
+    public void onComplete(String username) {
+       System.out.println("username is set to: " +username);
+       Log.d("user", username);
     }
 
     /**
@@ -140,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * class that is used to retive that data from the XML of Board Game Geek user collection
      *
-     * public accessable methods getNameList, getDetailList, getImageList
+     * public accessible methods getNameList, getDetailList, getImageList
      */
     public class RetrieveFeed extends AsyncTask{
 
