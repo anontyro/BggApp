@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">BggUserApp</string>
+
+    <string name="bu_find_user">Search User</string>
+    <string name="bu_user_area">User Area</string>
+    <string name="bu_home">Home</string>
+
     <string name="user_lookup_hint">Enter a valid BGG username:</string>
     <string name="go_button">Go</string>
     <string name="button_save">Save</string>
@@ -14,8 +19,12 @@
 
     <string name="dialog_title">Setup Main User</string>
     <string name="dialog_body">Enter a valid user name below</string>
+    <string name="title_activity_main_user">MainUserActivity</string>
 
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="action_settings">Settings</string>
 
 
 </resources>

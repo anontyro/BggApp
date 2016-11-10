@@ -17,7 +17,7 @@ public class DBManager {
     private SQLiteDatabase sqlDB;
     public static final String dbName="BggApp";
     public static final int dbVersion = 1;
-    public static String mainUser = "";
+    private static String mainUser = "";
 
     //all items for the users table
     public static final String tableUsers = "BggUsers";
@@ -39,18 +39,38 @@ public class DBManager {
     public static final String colWishlist = "Wishlist"; //boolean
     public static final String colModified = "LastModified"; //String/ date time
     public static final String colBggPage = "BggLink"; //String link to game page
-    public static final String colID = "ID"; // prim key auto increment
+    public static final String colID = "ID"; // prim key
 
-    private final String buildUserTable =
+    public final static String buildUserTable =
             "CREATE TABLE IF NOT EXISTS " +tableUsers
-            +"("+ colUsername +" TEXT PRIMARY KEY, "+colTotalGames+" INT, "+ colPrimaryUser +" BOOLEAN );"
+            +"("
+                    + colUsername +" TEXT PRIMARY KEY, "
+                    + colTotalGames+" INT, "
+                    + colPrimaryUser +" BOOLEAN " +
+                    ");"
+            ;
+
+    public final static String buildGameTable =
+            "CREATE TABLE IF NOT EXISTS " +tableGames +getUser()+"("
+                    + colForUsername + " TEXT NOT NULL, "
+                    + colTitle + " TEXT, "
+                    + colOwned + " BOOLEAN, "
+                    + colDuration + " INT, "
+                    + colPlayerCount + " INT, "
+                    + colImage + " TEXT, "
+                    + colWantToPlay + " BOOLEAN, "
+                    + colWishlist + " INT, "
+                    + colModified + " TEXT, "
+                    + colBggPage + " TEXT, "
+                    + colID +" TEXT PRIMARY KEY, "
+                    + "FOREIGN KEY ("+colForUsername+") REFERENCES "+tableUsers +"(" +colUsername + ")" +
+                    ");"
             ;
 
     public DBManager(Context context, String mainUser){
         this.mainUser = mainUser;
         DatabaseHelper db = new DatabaseHelper(context);
         sqlDB = db.getWritableDatabase();
-
     }
 
     //method that calls the database exists methods taking no parameters if looking for default
@@ -84,16 +104,16 @@ public class DBManager {
     }
 
     //query the games table
-    public Cursor query(String[]projection, String selection, String[]selecArgs, String sortOrder){
+    public Cursor query(String[]projection, String selection, String[]selectArgs, String sortOrder){
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(tableGames);
 
-        Cursor cursor = qb.query(sqlDB,projection,selection,selecArgs,null,null,sortOrder);
+        Cursor cursor = qb.query(sqlDB,projection,selection,selectArgs,null,null,sortOrder);
 
         return cursor;
     }
 
-
+    public static String getUser(){return mainUser.toLowerCase();}
 
 
     public static class DatabaseHelper extends SQLiteOpenHelper{
@@ -105,12 +125,14 @@ public class DBManager {
         }
 
         @Override
-        public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(buildUserTable);
+            db.execSQL(buildGameTable);
 
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        public void onUpgrade(SQLiteDatabase db, int i, int i1) {
 
         }
     }

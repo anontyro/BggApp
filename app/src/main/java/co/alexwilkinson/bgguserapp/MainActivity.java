@@ -2,6 +2,7 @@ package co.alexwilkinson.bgguserapp;
 
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.provider.SyncStateContract;
@@ -25,13 +26,15 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends HeaderActivity
         implements CreateUserDialogFrame.NoticeDialogListener, CreateUserDialogFrame.OnCompleteListener{
-    EditText etFindUser;
-    ListView lvCollection;
-    MyListAdapter myadapter;
-    Button buBgg;
-    int userTotal;
+    private EditText etFindUser;
+    protected ListView lvCollection;
+    protected MyListAdapter myadapter;
+    private Button buBgg;
+    protected int userTotal;
+    private DBManager dbManager;
+    protected ContentValues values;
 
     //title, description, image(String)
     public static ArrayList<BoardgameListItem> bgList = new ArrayList<>();
@@ -84,7 +87,8 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        Toast.makeText(this,"you chose wisely",Toast.LENGTH_LONG);
+
+        Toast.makeText(this,"you chose wisely",Toast.LENGTH_LONG).show();
         System.out.println("positive");
     }
 
@@ -95,7 +99,8 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-        Toast.makeText(this,"you whose poorly",Toast.LENGTH_LONG);
+
+        Toast.makeText(this,"you chose poorly",Toast.LENGTH_LONG).show();
         System.out.println("negative");
     }
 
@@ -106,8 +111,41 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onComplete(String username) {
-       System.out.println("username is set to: " +username);
-       Log.d("user", username);
+        if(!username.equalsIgnoreCase(etFindUser.getText().toString())){
+            String user = username;
+            etFindUser.setText(username);
+            lvCollection.setAdapter(null);
+            RetrieveFeed getGames = new RetrieveFeed(user);
+            //add .execute().get() to force the application to run now
+            getGames.execute();
+        }
+
+        if(userTotal !=0) {
+            dbManager = new DBManager(this, username);
+
+            values = new ContentValues();
+            values.put(DBManager.colUsername, username);
+            values.put(DBManager.colTotalGames, userTotal);
+            values.put(DBManager.colPrimaryUser, "True");
+            long id = dbManager.insertUser(values);
+            if(id > 0){
+                Toast.makeText(this,
+                        "Primary user: " +username + "was added and database created",
+                        Toast.LENGTH_LONG).show();
+            }
+            else{
+                Toast.makeText(this,
+                        "Error something blew up! Search again and try ",
+                        Toast.LENGTH_LONG).show();
+            }
+            System.out.println("username is set to: " + username);
+            Log.d("user", username);
+            System.out.println(DBManager.buildGameTable);
+            System.out.println(DBManager.buildUserTable);
+        }
+        else{
+            Toast.makeText(this,"Search for the user first to ensure they exist",Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
