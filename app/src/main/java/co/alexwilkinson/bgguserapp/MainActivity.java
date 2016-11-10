@@ -123,6 +123,12 @@ public class MainActivity extends HeaderActivity
         if(userTotal !=0) {
             dbManager = new DBManager(this, username);
 
+            /*
+            Calling the user ref file to
+             */
+            UserRef userRef = new UserRef(this);
+            userRef.saveData(username,userTotal);
+
             values = new ContentValues();
             values.put(DBManager.colUsername, username);
             values.put(DBManager.colTotalGames, userTotal);

@@ -17,11 +17,14 @@ import android.widget.Toast;
  * activies in the app
  */
 public class HeaderActivity extends AppCompatActivity {
+    UserRef userRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_header);
+
+        userRef = new UserRef(this);
     }
 
     @Override

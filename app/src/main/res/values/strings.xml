@@ -5,6 +5,9 @@
     <string name="bu_user_area">User Area</string>
     <string name="bu_home">Home</string>
 
+    <string name="tv_home_welcome">Welcome to the BGG user app get started and input your user details</string>
+
+
     <string name="user_lookup_hint">Enter a valid BGG username:</string>
     <string name="go_button">Go</string>
     <string name="button_save">Save</string>
