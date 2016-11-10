@@ -38,13 +38,15 @@ public class DBManager {
     public static final String colWantToPlay = "WantToPlay"; //boolean
     public static final String colWishlist = "Wishlist"; //boolean
     public static final String colModified = "LastModified"; //String/ date time
+    public static final String colReleased = "Year of publishing"; //String link to game page
     public static final String colBggPage = "BggLink"; //String link to game page
-    public static final String colID = "ID"; // prim key
+    public static final String colID = "GameID"; // String for the gameID
 
     public final static String buildUserTable =
             "CREATE TABLE IF NOT EXISTS " +tableUsers
             +"("
-                    + colUsername +" TEXT PRIMARY KEY, "
+                    + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + colUsername +" TEXT, "
                     + colTotalGames+" INT, "
                     + colPrimaryUser +" BOOLEAN " +
                     ");"
@@ -52,6 +54,7 @@ public class DBManager {
 
     public final static String buildGameTable =
             "CREATE TABLE IF NOT EXISTS " +tableGames +getUser()+"("
+                    + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + colForUsername + " TEXT NOT NULL, "
                     + colTitle + " TEXT, "
                     + colOwned + " BOOLEAN, "
@@ -59,10 +62,11 @@ public class DBManager {
                     + colPlayerCount + " INT, "
                     + colImage + " TEXT, "
                     + colWantToPlay + " BOOLEAN, "
-                    + colWishlist + " INT, "
+                    + colWishlist + " BOOLEAN, "
                     + colModified + " TEXT, "
                     + colBggPage + " TEXT, "
-                    + colID +" TEXT PRIMARY KEY, "
+                    + colID +" TEXT, "
+                    + colReleased +"INT, "
                     + "FOREIGN KEY ("+colForUsername+") REFERENCES "+tableUsers +"(" +colUsername + ")" +
                     ");"
             ;

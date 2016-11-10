@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * the main splash screen for where users can be directed
@@ -14,6 +15,7 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
     Button buSearchUser, buUserHome, buCreateUser;
     TextView tvUser;
     UserRef userRef;
+    String userData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,8 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         buUserHome = (Button)findViewById(R.id.buUserArea);
         buUserHome.setOnClickListener(this);
 
+
+
         buCreateUser = (Button)findViewById(R.id.buCreateUser);
 
 
@@ -36,7 +40,7 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
             buCreateUser.setVisibility(View.GONE);
         }
 
-        String userData = userRef.loadData();
+        userData = userRef.loadData();
         if(!userData.contains("No user created")) {
             String[]dataArray = userData.split("\n");
             tvUser = (TextView)findViewById(R.id.tvUser);
@@ -44,6 +48,10 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
             tvUser.setText("Welcome back "+dataArray[0] + " you currently have " +dataArray[1]
                     + " games in your library"
             );
+        }
+
+        if(userData.contains("No user created")){
+            buUserHome.setEnabled(false);
         }
     }
 
@@ -56,6 +64,7 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
 
         }
         else if(value == R.id.buUserArea){
+
 
         }
         else if(value == R.id.buCreateUser){

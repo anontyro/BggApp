@@ -6,6 +6,7 @@
     <string name="bu_home">Home</string>
 
     <string name="tv_home_welcome">Welcome to the BGG user app get started and input your user details</string>
+    <string name="bu_home_get_started">Click here to get started by adding your details</string>
 
 
     <string name="user_lookup_hint">Enter a valid BGG username:</string>

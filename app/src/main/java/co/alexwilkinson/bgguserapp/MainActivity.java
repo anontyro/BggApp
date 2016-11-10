@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -232,7 +233,9 @@ public class MainActivity extends HeaderActivity
         ArrayList<String> name = new ArrayList<>();
         ArrayList<String> released = new ArrayList<>();
         ArrayList<String> gameID = new ArrayList<>();
-//        ArrayList<String> image = new ArrayList<>();
+        ArrayList<Integer[]>statusList = new ArrayList<>();
+//        ArrayList<String> LengthList = new ArrayList<>();
+        ArrayList<String> imageList = new ArrayList<>();
 
         public RetrieveFeed(String username){
             this.username = username;
@@ -274,16 +277,27 @@ public class MainActivity extends HeaderActivity
                         else if(xpp.getName().equalsIgnoreCase("item")){
                             gameID.add(xpp.getAttributeValue(1));
                         }
-                        //check the yearh published tag
+                        //check the year published tag
                         else if(xpp.getName().equalsIgnoreCase("yearpublished")){
                             released.add(xpp.nextText());
                         }
-                        //pull the thumnail tag
-//                        else if(xpp.getName().equalsIgnoreCase("thumbnail")){
-//                            image.add(xpp.nextText());
-//                        }
+//                        pull the thumnail tag
+                        else if(xpp.getName().equalsIgnoreCase("thumbnail")){
+                            imageList.add(xpp.nextText());
+                        }
                         else if(xpp.getName().equalsIgnoreCase("items")){
                             userTotal = Integer.parseInt(xpp.getAttributeValue(0));
+                        }
+                        //will check all the status namespace for the items to add to the ArrayList<Integer[]>()
+                        // if return zero then false one is true
+                        else if(xpp.getName().equalsIgnoreCase("status")){
+                            Integer[]statusElements = {
+                                    Integer.parseInt(xpp.getAttributeValue(0)), //owned
+                                    Integer.parseInt(xpp.getAttributeValue(4)), //wants to play
+                                    Integer.parseInt(xpp.getAttributeValue(6)), //wishlist
+
+                            };
+                            statusList.add(statusElements);
                         }
                         //check the status tag and namespaces within it
 //                        else if(xpp.getName().equalsIgnoreCase("status")){
@@ -373,6 +387,43 @@ public class MainActivity extends HeaderActivity
             }
             System.out.println("data added to list");
             return bgList;
+        }
+
+        /**
+         * method that will take the all of the data stored from the XML
+         * and start to get it ready to commit to the database.
+         * @return
+         */
+        protected ContentValues addUser(){
+            ContentValues values = new ContentValues();
+
+            for(int i = 0; i<name.size();i++){
+                String wishlist = "false";
+                String wantsToPlay = "false";
+                String owned = "false";
+                Integer[]statusValues = statusList.get(i);
+                if(statusValues[0] !=0) {
+                    owned = "true";
+                }
+                if(statusValues[4] !=0) {
+                    wantsToPlay = "true";
+                }
+                if(statusValues[6] !=0) {
+                    wishlist = "true";
+                }
+
+                values.put(DBManager.colForUsername, etFindUser.getText().toString());
+                values.put(DBManager.colTitle, name.get(i));
+                values.put(DBManager.colReleased, released.get(i));
+                values.put(DBManager.colImage, imageList.get(i));
+                values.put(DBManager.colID, gameID.get(i));
+                values.put(DBManager.colBggPage, "https://boardgamegeek.com/boardgame/"+gameID.get(i));
+                values.put(DBManager.colOwned, owned);
+                values.put(DBManager.colWantToPlay, wantsToPlay);
+                values.put(DBManager.colWishlist, wishlist);
+            }
+
+            return values;
         }
 
     }
