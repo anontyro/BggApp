@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.provider.SyncStateContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ public class MainActivity extends HeaderActivity
     protected int userTotal;
     private DBManager dbManager;
     protected ContentValues values;
+    protected RetrieveFeed getGames;
 
     //title, description, image(String)
     public static ArrayList<BoardgameListItem> bgList = new ArrayList<>();
@@ -59,7 +61,7 @@ public class MainActivity extends HeaderActivity
     //search button that will check the bgg API and return the user
     public void buSearch(View view) {
         String user = etFindUser.getText().toString();
-        RetrieveFeed getGames = new RetrieveFeed(user);
+        getGames = new RetrieveFeed(user);
             //add .execute().get() to force the application to run now
             getGames.execute();
     }
@@ -77,7 +79,17 @@ public class MainActivity extends HeaderActivity
             dialog.show(fm, "addUser");
         }
         else{
-            //if it exists do this, probably add to the database
+//            if(getGames.name.size() !=0){
+//                boolean check = getGames.submitUser();
+//                if(check == true){
+//                    Toast.makeText(getApplicationContext(),
+//                            "User added to database",Toast.LENGTH_LONG).show();
+//                }
+//                else{
+//                    Toast.makeText(getApplicationContext(),
+//                            "Error could not add user", Toast.LENGTH_LONG).show();
+//                }
+//            }
         }
     }
 
@@ -119,6 +131,8 @@ public class MainActivity extends HeaderActivity
             RetrieveFeed getGames = new RetrieveFeed(user);
             //add .execute().get() to force the application to run now
             getGames.execute();
+            SaveUser newUser = new SaveUser();
+//            newUser.execute();
         }
 
         if(userTotal !=0) {
@@ -135,7 +149,7 @@ public class MainActivity extends HeaderActivity
             values.put(DBManager.colTotalGames, userTotal);
             values.put(DBManager.colPrimaryUser, "True");
             long id = dbManager.insertUser(values);
-            if(id > 0){
+            if(id > 0 ){
                 Toast.makeText(this,
                         "Primary user: " +username + "was added and database created",
                         Toast.LENGTH_LONG).show();
@@ -229,6 +243,7 @@ public class MainActivity extends HeaderActivity
         String collection = "collection?username=";
         String username = "";
         URL url;
+        ContentValues values;
 
         ArrayList<String> name = new ArrayList<>();
         ArrayList<String> released = new ArrayList<>();
@@ -317,6 +332,8 @@ public class MainActivity extends HeaderActivity
                 //call the method to add the values to the main BoardgameList
                 bgList = addToGameList();
 
+
+
             }
             catch(Exception ex){
                 ex.getStackTrace();
@@ -331,7 +348,6 @@ public class MainActivity extends HeaderActivity
          */
         @Override
         protected void onPostExecute(Object o) {
-
             if(name.size() !=0){
 
                 myadapter = new MyListAdapter(bgList);
@@ -353,6 +369,7 @@ public class MainActivity extends HeaderActivity
 
         }
 
+        //getter methods used to reteive values created for use later
 
         protected InputStream getInputStream(URL url){
             try{
@@ -365,11 +382,28 @@ public class MainActivity extends HeaderActivity
             }
         }
 
+        public String getUsername(){return username;}
+
         public ArrayList<String> getGameList(){return name;}
 
         public ArrayList<String> getDetailList(){
             return released;
         }
+
+        public ArrayList<String> getGameID(){
+            return gameID;
+        }
+
+        public ArrayList<Integer[]> getStatusList(){
+            return statusList;
+        }
+
+        public ArrayList<String> getimageList(){
+            return imageList;
+        }
+
+//        public ArrayList<String> getLengthList(){return lengthList;}
+
 
         /*
         Method to add all of the values to the BoardgameListItem to be displayed in the ListView
@@ -386,22 +420,57 @@ public class MainActivity extends HeaderActivity
 
             }
             System.out.println("data added to list");
+            System.out.println("values: "+values);
             return bgList;
         }
 
+
+    }
+
+    public class SaveUser extends AsyncTask{
+        String username = getGames.getUsername();
+        ArrayList<String> gameList = getGames.getGameList();
+        ArrayList<String> gameDetailList = getGames.getDetailList();
+        ArrayList<String> gameIDList = getGames.getGameID();
+        ArrayList<Integer[]> gameStatusList = getGames.getStatusList();
+        ArrayList<String> gameImageList = getGames.getimageList();
+
+
+        @Override
+        protected void onPreExecute() {
+            if(gameList.size() == 0){
+                cancel(true);
+            }
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            addUser();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Object[] values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            super.onPostExecute(o);
+        }
         /**
          * method that will take the all of the data stored from the XML
          * and start to get it ready to commit to the database.
          * @return
          */
-        protected ContentValues addUser(){
+        protected void addUser(){
             ContentValues values = new ContentValues();
-
-            for(int i = 0; i<name.size();i++){
+            System.out.println("Started to add values " + gameList.size());
+            for(int i = 0; i<gameList.size();i++){
                 String wishlist = "false";
                 String wantsToPlay = "false";
                 String owned = "false";
-                Integer[]statusValues = statusList.get(i);
+                Integer[]statusValues = gameStatusList.get(i);
                 if(statusValues[0] !=0) {
                     owned = "true";
                 }
@@ -412,19 +481,22 @@ public class MainActivity extends HeaderActivity
                     wishlist = "true";
                 }
 
-                values.put(DBManager.colForUsername, etFindUser.getText().toString());
-                values.put(DBManager.colTitle, name.get(i));
-                values.put(DBManager.colReleased, released.get(i));
-                values.put(DBManager.colImage, imageList.get(i));
-                values.put(DBManager.colID, gameID.get(i));
-                values.put(DBManager.colBggPage, "https://boardgamegeek.com/boardgame/"+gameID.get(i));
+                values.put(DBManager.colForUsername, username);
+                values.put(DBManager.colTitle, gameList.get(i));
+                values.put(DBManager.colReleased, gameDetailList.get(i));
+                values.put(DBManager.colImage, gameImageList.get(i));
+                values.put(DBManager.colID, gameIDList.get(i));
+                values.put(DBManager.colBggPage, "https://boardgamegeek.com/boardgame/"+gameIDList.get(i));
                 values.put(DBManager.colOwned, owned);
                 values.put(DBManager.colWantToPlay, wantsToPlay);
                 values.put(DBManager.colWishlist, wishlist);
+
+                long id = dbManager.insertGame(values);
             }
 
-            return values;
+
         }
+
 
     }
 
