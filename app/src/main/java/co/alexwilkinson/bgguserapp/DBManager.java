@@ -38,7 +38,7 @@ public class DBManager {
     public static final String colWantToPlay = "WantToPlay"; //boolean
     public static final String colWishlist = "Wishlist"; //boolean
     public static final String colModified = "LastModified"; //String/ date time
-    public static final String colReleased = "Year of publishing"; //String link to game page
+    public static final String colReleased = "Yearpublished"; //String link to game page
     public static final String colBggPage = "BggLink"; //String link to game page
     public static final String colID = "GameID"; // String for the gameID
 
@@ -66,7 +66,7 @@ public class DBManager {
                     + colModified + " TEXT, "
                     + colBggPage + " TEXT, "
                     + colID +" TEXT, "
-                    + colReleased +"INT, "
+                    + colReleased +" INT, "
                     + "FOREIGN KEY ("+colForUsername+") REFERENCES "+tableUsers +"(" +colUsername + ")" +
                     ");"
             ;
@@ -105,6 +105,11 @@ public class DBManager {
         long id = sqlDB.insert(tableGames,"",values);
 
         return id;
+    }
+    public void queryGameTable(String query){
+        sqlDB.execSQL(query);
+
+
     }
 
     //query the games table

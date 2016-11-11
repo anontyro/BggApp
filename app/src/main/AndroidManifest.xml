@@ -10,9 +10,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
-
-        </activity>
+        <activity android:name=".MainActivity"></activity>
         <activity
             android:name=".WebBrowserActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -26,6 +24,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".UserAreaMainActivity"></activity>
     </application>
 
 </manifest>

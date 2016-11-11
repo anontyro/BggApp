@@ -131,8 +131,7 @@ public class MainActivity extends HeaderActivity
             RetrieveFeed getGames = new RetrieveFeed(user);
             //add .execute().get() to force the application to run now
             getGames.execute();
-            SaveUser newUser = new SaveUser();
-//            newUser.execute();
+
         }
 
         if(userTotal !=0) {
@@ -148,6 +147,11 @@ public class MainActivity extends HeaderActivity
             values.put(DBManager.colUsername, username);
             values.put(DBManager.colTotalGames, userTotal);
             values.put(DBManager.colPrimaryUser, "True");
+
+            SaveUser newUser = new SaveUser();
+            System.out.println("Save users games now!");
+            newUser.execute();
+
             long id = dbManager.insertUser(values);
             if(id > 0 ){
                 Toast.makeText(this,
@@ -434,8 +438,7 @@ public class MainActivity extends HeaderActivity
         ArrayList<String> gameIDList = getGames.getGameID();
         ArrayList<Integer[]> gameStatusList = getGames.getStatusList();
         ArrayList<String> gameImageList = getGames.getimageList();
-
-
+        String addUserQuery;
         @Override
         protected void onPreExecute() {
             if(gameList.size() == 0){
@@ -456,14 +459,19 @@ public class MainActivity extends HeaderActivity
 
         @Override
         protected void onPostExecute(Object o) {
-            super.onPostExecute(o);
+
+
         }
         /**
          * method that will take the all of the data stored from the XML
          * and start to get it ready to commit to the database.
          * @return
          */
+
+
         protected void addUser(){
+
+
             ContentValues values = new ContentValues();
             System.out.println("Started to add values " + gameList.size());
             for(int i = 0; i<gameList.size();i++){
@@ -474,12 +482,38 @@ public class MainActivity extends HeaderActivity
                 if(statusValues[0] !=0) {
                     owned = "true";
                 }
-                if(statusValues[4] !=0) {
+                if(statusValues[1] !=0) {
                     wantsToPlay = "true";
                 }
-                if(statusValues[6] !=0) {
+                if(statusValues[2] !=0) {
                     wishlist = "true";
                 }
+
+//                addUserQuery += "INSERT INTO " + DBManager.tableGames
+//                        + " ('"+DBManager.colForUsername+"'," +
+//                        "'"+DBManager.colTitle+"'," +
+//                        "'"+DBManager.colReleased+"'," +
+//                        "'"+DBManager.colImage+"'," +
+//                        "'"+DBManager.colID+"'," +
+//                        "'"+DBManager.colBggPage+"'," +
+//                        "'"+DBManager.colOwned+"'," +
+//                        "'"+DBManager.colWantToPlay+"'," +
+//                        "'"+DBManager.colWishlist+"') "
+//
+//                        +"VALUES"+
+//
+//                        "('"+username+"'," +
+//                        "'"+gameList.get(i)+"'," +
+//                        "'"+gameDetailList.get(i)+"'," +
+//                        "'"+gameImageList.get(i)+"'," +
+//                        "'"+gameIDList.get(i)+"'," +
+//                        "'"+"https://boardgamegeek.com/boardgame/"+gameIDList.get(i)+"'," +
+//                        "'"+owned+"'," +
+//                        "'"+wantsToPlay+"'," +
+//                        "'"+wishlist+"'); \n"
+//                ;
+
+
 
                 values.put(DBManager.colForUsername, username);
                 values.put(DBManager.colTitle, gameList.get(i));
@@ -493,6 +527,8 @@ public class MainActivity extends HeaderActivity
 
                 long id = dbManager.insertGame(values);
             }
+//            dbManager.queryGameTable(addUserQuery);
+
 
 
         }
