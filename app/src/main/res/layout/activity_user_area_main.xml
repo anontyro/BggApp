@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="co.alexwilkinson.bgguserapp.UserAreaMainActivity">
+    tools:context="co.alexwilkinson.bgguserapp.userarea.UserAreaMainActivity">
 
     <LinearLayout
         android:orientation="vertical"
@@ -23,7 +23,7 @@
             <Spinner
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/spinner"
+                android:id="@+id/spUserArea"
                 android:layout_weight="2" />
 
             <Button
@@ -37,7 +37,8 @@
 
         <ListView
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:id="@+id/lvUserGames" />
 
     </LinearLayout>
 

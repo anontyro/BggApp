@@ -1,4 +1,4 @@
-package co.alexwilkinson.bgguserapp;
+package co.alexwilkinson.bgguserapp.utilities;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,12 +1,17 @@
-package co.alexwilkinson.bgguserapp;
+package co.alexwilkinson.bgguserapp.home;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import co.alexwilkinson.bgguserapp.userarea.UserAreaMainActivity;
+import co.alexwilkinson.bgguserapp.utilities.DBManager;
+import co.alexwilkinson.bgguserapp.HeaderActivity;
+import co.alexwilkinson.bgguserapp.R;
+import co.alexwilkinson.bgguserapp.utilities.UserRef;
+import co.alexwilkinson.bgguserapp.usersearch.MainActivity;
 
 /**
  * the main splash screen for where users can be directed
@@ -64,7 +69,8 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
 
         }
         else if(value == R.id.buUserArea){
-
+            Intent intent = new Intent(getApplicationContext(), UserAreaMainActivity.class);
+            startActivity(intent);
 
         }
         else if(value == R.id.buCreateUser){

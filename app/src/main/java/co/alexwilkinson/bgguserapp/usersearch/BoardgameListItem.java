@@ -1,4 +1,4 @@
-package co.alexwilkinson.bgguserapp;
+package co.alexwilkinson.bgguserapp.usersearch;
 
 /**
  * Created by Alex on 26/10/2016.

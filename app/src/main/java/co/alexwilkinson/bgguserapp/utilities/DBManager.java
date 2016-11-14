@@ -1,4 +1,4 @@
-package co.alexwilkinson.bgguserapp;
+package co.alexwilkinson.bgguserapp.utilities;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -113,9 +113,19 @@ public class DBManager {
     }
 
     //query the games table
-    public Cursor query(String[]projection, String selection, String[]selectArgs, String sortOrder){
+    public Cursor queryGame(String[]projection, String selection, String[]selectArgs, String sortOrder){
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(tableGames);
+
+        Cursor cursor = qb.query(sqlDB,projection,selection,selectArgs,null,null,sortOrder);
+
+        return cursor;
+    }
+
+    //query for user table
+    public Cursor queryUser(String[]projection, String selection, String[]selectArgs, String sortOrder){
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        qb.setTables(tableUsers);
 
         Cursor cursor = qb.query(sqlDB,projection,selection,selectArgs,null,null,sortOrder);
 

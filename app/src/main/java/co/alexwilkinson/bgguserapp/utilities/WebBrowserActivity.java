@@ -1,4 +1,4 @@
-package co.alexwilkinson.bgguserapp;
+package co.alexwilkinson.bgguserapp.utilities;
 
 import android.annotation.SuppressLint;
 import android.support.v7.app.ActionBar;
@@ -10,8 +10,9 @@ import android.view.View;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.ProgressBar;
+
+import co.alexwilkinson.bgguserapp.R;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.

@@ -1,19 +1,15 @@
-package co.alexwilkinson.bgguserapp;
+package co.alexwilkinson.bgguserapp.usersearch;
 
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.provider.Settings;
-import android.provider.SyncStateContract;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +23,13 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+
+import co.alexwilkinson.bgguserapp.utilities.CreateUserDialogFrame;
+import co.alexwilkinson.bgguserapp.utilities.DBManager;
+import co.alexwilkinson.bgguserapp.HeaderActivity;
+import co.alexwilkinson.bgguserapp.R;
+import co.alexwilkinson.bgguserapp.utilities.UserRef;
+import co.alexwilkinson.bgguserapp.utilities.WebBrowserActivity;
 
 public class MainActivity extends HeaderActivity
         implements CreateUserDialogFrame.NoticeDialogListener, CreateUserDialogFrame.OnCompleteListener{
