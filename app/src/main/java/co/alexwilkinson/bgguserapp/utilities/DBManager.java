@@ -129,6 +129,7 @@ public class DBManager {
 
         Cursor cursor = qb.query(sqlDB,projection,selection,selectArgs,null,null,sortOrder);
 
+
         return cursor;
     }
 

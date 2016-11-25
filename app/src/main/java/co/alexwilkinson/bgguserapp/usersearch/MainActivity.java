@@ -4,6 +4,7 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -82,19 +83,18 @@ public class MainActivity extends HeaderActivity
             dialog.show(fm, "addUser");
         }
         else{
-//            if(getGames.name.size() !=0){
-//                boolean check = getGames.submitUser();
-//                if(check == true){
-//                    Toast.makeText(getApplicationContext(),
-//                            "User added to database",Toast.LENGTH_LONG).show();
-//                }
-//                else{
-//                    Toast.makeText(getApplicationContext(),
-//                            "Error could not add user", Toast.LENGTH_LONG).show();
-//                }
-//            }
+            if(bgList.size() !=0){
+               boolean exists = doesUserExist(etFindUser.getText().toString());
+                System.out.println(exists);
+
+
+            }
+            else{
+                System.out.println("user not checked");
+            }
+            }
         }
-    }
+
 
     /**
      * Implemented from the CreateUserDialogFrame, event that is fired from the pressing of the
@@ -141,7 +141,7 @@ public class MainActivity extends HeaderActivity
             dbManager = new DBManager(this, username);
 
             /*
-            Calling the user ref file to
+            Calling the user ref file to save the basic user info
              */
             UserRef userRef = new UserRef(this);
             userRef.saveData(username,userTotal);
@@ -174,6 +174,28 @@ public class MainActivity extends HeaderActivity
         else{
             Toast.makeText(this,"Search for the user first to ensure they exist",Toast.LENGTH_LONG).show();
         }
+    }
+
+    public Boolean doesUserExist(String user){
+        boolean exists = false;
+        dbManager = new DBManager(this,user);
+        Cursor cursor1 = dbManager.queryUser(
+                null,
+                DBManager.colUsername+"=?",
+                new String[]{etFindUser.getText().toString()},
+                null);
+
+        if(cursor1.moveToFirst()){
+            do{
+
+                if(cursor1.getString(cursor1.getColumnIndex(DBManager.colUsername))
+                        .equalsIgnoreCase(etFindUser.getText().toString())){
+                    exists = true;
+                }
+
+            }while(cursor1.moveToNext());
+        }
+        return exists;
     }
 
     /**
