@@ -112,12 +112,15 @@ public class DBManager {
 
     }
 
-    //query the games table
-    public Cursor queryGame(String[]projection, String selection, String[]selectArgs, String sortOrder){
+    /*
+    query the games table
+
+     */
+    public Cursor queryGame(String[]columns, String where, String[]whereArgs, String sortOrder){
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(tableGames);
 
-        Cursor cursor = qb.query(sqlDB,projection,selection,selectArgs,null,null,sortOrder);
+        Cursor cursor = qb.query(sqlDB,columns,where,whereArgs,null,null,sortOrder);
 
         return cursor;
     }

@@ -33,7 +33,7 @@ import co.alexwilkinson.bgguserapp.utilities.UserRef;
 import co.alexwilkinson.bgguserapp.utilities.WebBrowserActivity;
 
 public class MainActivity extends HeaderActivity
-        implements CreateUserDialogFrame.NoticeDialogListener, CreateUserDialogFrame.OnCompleteListener{
+        implements CreateUserDialogFrame.NoticeDialogListener, CreateUserDialogFrame.OnCompleteListener {
     private EditText etFindUser;
     protected ListView lvCollection;
     protected MyListAdapter myadapter;
@@ -48,6 +48,7 @@ public class MainActivity extends HeaderActivity
 
     /**
      * main method for creating the activity most operations revolve around this
+     *
      * @param savedInstanceState
      */
     @Override
@@ -56,8 +57,8 @@ public class MainActivity extends HeaderActivity
         setContentView(R.layout.activity_main);
 
         //setup the objects to be callable
-        lvCollection = (ListView)findViewById(R.id.lvCollection);
-        etFindUser = (EditText)findViewById(R.id.etFindUser);
+        lvCollection = (ListView) findViewById(R.id.lvCollection);
+        etFindUser = (EditText) findViewById(R.id.etFindUser);
 
 
     }
@@ -66,68 +67,73 @@ public class MainActivity extends HeaderActivity
     public void buSearch(View view) {
         String user = etFindUser.getText().toString();
         getGames = new RetrieveFeed(user);
-            //add .execute().get() to force the application to run now
-            getGames.execute();
+        //add .execute().get() to force the application to run now
+        getGames.execute();
     }
 
     //button used to save the current user selected in the list, if no prime user exists then
     //the button will throw a dialog to ask to add one and create the database
     public void buSaveUser(View view) {
         //check to see if database exists
-        if(DBManager.databaseExists() ==false){ //checks to see if the database exists
+        if (DBManager.databaseExists() == false) { //checks to see if the database exists
             //steps needed to create and call the dialog window
             FragmentManager fm = getFragmentManager();
             CreateUserDialogFrame dialog;
             //send the current username from the search box
             dialog = CreateUserDialogFrame.setUsername(etFindUser.getText().toString());
             dialog.show(fm, "addUser");
-        }
-        else{
-            if(bgList.size() !=0){
-               boolean exists = doesUserExist(etFindUser.getText().toString());
+        } else {
+            if (bgList.size() != 0) {
+                boolean exists = doesUserExist(etFindUser.getText().toString());
                 System.out.println(exists);
+                if(exists==false){
+                    createNewUser(etFindUser.getText().toString(), userTotal, false);
+                }
 
 
-            }
-            else{
+            } else {
                 System.out.println("user not checked");
-            }
+
             }
         }
+    }
 
 
     /**
      * Implemented from the CreateUserDialogFrame, event that is fired from the pressing of the
      * positive button.
+     *
      * @param dialog
      */
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
 
-        Toast.makeText(this,"you chose wisely",Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "you chose wisely", Toast.LENGTH_LONG).show();
         System.out.println("positive");
     }
 
     /**
      * Implemented from the CreateUserDialogFrame, event that is fired from the pressing of the
      * negative button.
+     *
      * @param dialog
      */
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
 
-        Toast.makeText(this,"you chose poorly",Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "you chose poorly", Toast.LENGTH_LONG).show();
         System.out.println("negative");
     }
 
     /**
      * Implemented from the CreateUserDialogFrame, event that is fired at the end of the dialog session
      * these values are returned at the end.
+     *
      * @param username
      */
     @Override
     public void onComplete(String username) {
-        if(!username.equalsIgnoreCase(etFindUser.getText().toString())){
+        if (!username.equalsIgnoreCase(etFindUser.getText().toString())) {
             String user = username;
             etFindUser.setText(username);
             lvCollection.setAdapter(null);
@@ -137,66 +143,111 @@ public class MainActivity extends HeaderActivity
 
         }
 
-        if(userTotal !=0) {
-            dbManager = new DBManager(this, username);
-
-            /*
-            Calling the user ref file to save the basic user info
-             */
-            UserRef userRef = new UserRef(this);
-            userRef.saveData(username,userTotal);
-
-            values = new ContentValues();
-            values.put(DBManager.colUsername, username);
-            values.put(DBManager.colTotalGames, userTotal);
-            values.put(DBManager.colPrimaryUser, "True");
-
-            SaveUser newUser = new SaveUser();
-            System.out.println("Save users games now!");
-            newUser.execute();
-
-            long id = dbManager.insertUser(values);
-            if(id > 0 ){
-                Toast.makeText(this,
-                        "Primary user: " +username + "was added and database created",
-                        Toast.LENGTH_LONG).show();
-            }
-            else{
-                Toast.makeText(this,
-                        "Error something blew up! Search again and try ",
-                        Toast.LENGTH_LONG).show();
-            }
-            System.out.println("username is set to: " + username);
-            Log.d("user", username);
-            System.out.println(DBManager.buildGameTable);
-            System.out.println(DBManager.buildUserTable);
-        }
-        else{
-            Toast.makeText(this,"Search for the user first to ensure they exist",Toast.LENGTH_LONG).show();
+        if (userTotal != 0) {
+            createNewUser(username, userTotal, true);
+//            dbManager = new DBManager(this, username);
+//
+//            /*
+//            Calling the user ref file to save the basic user info
+//             */
+//            UserRef userRef = new UserRef(this);
+//            userRef.saveData(username, userTotal);
+//
+//            values = new ContentValues();
+//            values.put(DBManager.colUsername, username);
+//            values.put(DBManager.colTotalGames, userTotal);
+//            values.put(DBManager.colPrimaryUser, "True");
+//
+//            SaveUser newUser = new SaveUser();
+//            System.out.println("Save users games now!");
+//            newUser.execute();
+//
+//            long id = dbManager.insertUser(values);
+//            if (id > 0) {
+//                Toast.makeText(this,
+//                        "Primary user: " + username + "was added and database created",
+//                        Toast.LENGTH_LONG).show();
+//            } else {
+//                Toast.makeText(this,
+//                        "Error something blew up! Search again and try ",
+//                        Toast.LENGTH_LONG).show();
+//            }
+//            System.out.println("username is set to: " + username);
+//            Log.d("user", username);
+//            System.out.println(DBManager.buildGameTable);
+        } else {
+            Toast.makeText(this, "Search for the user first to ensure they exist", Toast.LENGTH_LONG).show();
         }
     }
 
-    public Boolean doesUserExist(String user){
+    public Boolean doesUserExist(String user) {
         boolean exists = false;
-        dbManager = new DBManager(this,user);
+        dbManager = new DBManager(this, user);
         Cursor cursor1 = dbManager.queryUser(
                 null,
-                DBManager.colUsername+"=?",
+                DBManager.colUsername + "=?",
                 new String[]{etFindUser.getText().toString()},
                 null);
 
-        if(cursor1.moveToFirst()){
-            do{
+        if (cursor1.moveToFirst()) {
+            do {
 
-                if(cursor1.getString(cursor1.getColumnIndex(DBManager.colUsername))
-                        .equalsIgnoreCase(etFindUser.getText().toString())){
+                if (cursor1.getString(cursor1.getColumnIndex(DBManager.colUsername))
+                        .equalsIgnoreCase(etFindUser.getText().toString())) {
                     exists = true;
                 }
 
-            }while(cursor1.moveToNext());
+            } while (cursor1.moveToNext());
         }
         return exists;
     }
+
+    protected boolean createNewUser(String username, int userTotal, boolean isprime) {
+
+    dbManager=new DBManager(this,username);
+
+    /*
+    Calling the user ref file to save the basic user info
+     */
+    UserRef userRef = new UserRef(this);
+    userRef.saveData(username,userTotal);
+
+    values=new
+
+    ContentValues();
+
+    values.put(DBManager.colUsername,username);
+    values.put(DBManager.colTotalGames,userTotal);
+    values.put(DBManager.colPrimaryUser,isprime);
+
+    SaveUser newUser = new SaveUser();
+    System.out.println("Save users games now!");
+    newUser.execute();
+
+    long id = dbManager.insertUser(values);
+    if(id>0)
+
+    {
+        Toast.makeText(this,
+                "Primary user: " + username + "was added and database created",
+                Toast.LENGTH_LONG).show();
+        return true;
+    }
+
+    else
+
+    {
+        Toast.makeText(this,
+                "Error something blew up! Search again and try ",
+                Toast.LENGTH_LONG).show();
+
+        System.out.println("username is set to: "+username);
+        Log.d("user",username);
+        System.out.println(DBManager.buildGameTable);
+        return false;
+    }
+
+}
 
     /**
      * private inner class that is used to control and display the XML content in the ListView
