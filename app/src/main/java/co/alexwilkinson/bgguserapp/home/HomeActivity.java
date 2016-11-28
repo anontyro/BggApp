@@ -35,29 +35,11 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         buUserHome = (Button)findViewById(R.id.buUserArea);
         buUserHome.setOnClickListener(this);
 
-
-
         buCreateUser = (Button)findViewById(R.id.buCreateUser);
 
+        checkPrimeUserExists();
 
 
-        if(DBManager.databaseExists() ==true){
-            buCreateUser.setVisibility(View.GONE);
-        }
-
-        userData = userRef.loadData();
-        if(!userData.contains("No user created")) {
-            String[]dataArray = userData.split("\n");
-            tvUser = (TextView)findViewById(R.id.tvUser);
-
-            tvUser.setText("Welcome back "+dataArray[0] + " you currently have " +dataArray[1]
-                    + " games in your library"
-            );
-        }
-
-        if(userData.contains("No user created")){
-            buUserHome.setEnabled(false);
-        }
     }
 
     @Override
@@ -75,6 +57,28 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         }
         else if(value == R.id.buCreateUser){
 
+        }
+    }
+
+    public void checkPrimeUserExists(){
+
+        if(DBManager.databaseExists() ==true){
+            buCreateUser.setVisibility(View.GONE);
+        }
+
+        userData = userRef.loadData();
+        if(!userData.contains("No user created")) {
+            String[]dataArray = userData.split("\n");
+            System.out.println(userData.toString());
+            tvUser = (TextView)findViewById(R.id.tvUser);
+
+            tvUser.setText("Welcome back "+dataArray[0] + " you currently have " +dataArray[1]
+                    + " games in your library"
+            );
+        }
+
+        if(userData.contains("No user created")){
+            buUserHome.setEnabled(false);
         }
     }
 }

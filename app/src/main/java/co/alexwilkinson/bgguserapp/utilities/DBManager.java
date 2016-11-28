@@ -11,9 +11,11 @@ import java.sql.*;
 
 /**
  * Created by Alex on 21/10/2016.
+ * Helper class used to allow the app to interface with the SQLite internal database
  */
 
 public class DBManager {
+    //declared variables
     private SQLiteDatabase sqlDB;
     public static final String dbName="BggApp";
     public static final int dbVersion = 1;
@@ -31,10 +33,10 @@ public class DBManager {
     //--------------------------------------------------
     public static final String colForUsername = "Username"; // foreign key
     public static final String colOwned = "Owned"; // boolean
-    public static final String colTitle = "GameTitle";
+    public static final String colTitle = "GameTitle"; //String
     public static final String colDuration = "Length"; //int
     public static final String colPlayerCount = "MaxPlayers"; //int
-    public static final String colImage = "ImageURL";
+    public static final String colImage = "ImageURL"; //String for url
     public static final String colWantToPlay = "WantToPlay"; //boolean
     public static final String colWishlist = "Wishlist"; //boolean
     public static final String colModified = "LastModified"; //String/ date time
@@ -42,6 +44,7 @@ public class DBManager {
     public static final String colBggPage = "BggLink"; //String link to game page
     public static final String colID = "GameID"; // String for the gameID
 
+    //builder user table query
     public final static String buildUserTable =
             "CREATE TABLE IF NOT EXISTS " +tableUsers
             +"("
@@ -52,6 +55,7 @@ public class DBManager {
                     ");"
             ;
 
+    //build game table query
     public final static String buildGameTable =
             "CREATE TABLE IF NOT EXISTS " +tableGames +getUser()+"("
                     + "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -71,50 +75,79 @@ public class DBManager {
                     ");"
             ;
 
+    /**
+     * Constructor for the class that will take the application context and the mainuser creating
+     * a writeable instance of the database.
+     * @param context this or getApplicationContext()
+     * @param mainUser the primary user of the database, the phone owner
+     */
     public DBManager(Context context, String mainUser){
         this.mainUser = mainUser;
         DatabaseHelper db = new DatabaseHelper(context);
         sqlDB = db.getWritableDatabase();
     }
 
-    //method that calls the database exists methods taking no parameters if looking for default
+
+    /**
+     * Simple method that called the databaseExists method to check if the database has yet been
+     * created.
+     * @return true if database has been created false if not
+     */
     public static boolean databaseExists(){
         return databaseExists("/data/data/co.alexwilkinson.bgguserapp/databases/BggApp");
     }
-    //allows the user to add their own path if different
+
+    /**
+     * Overide method that takes one parameter to check that the database exists.
+     * @param dbPath the full location of the database
+     * @return true if database exists false if not
+     */
     public static boolean databaseExists(String dbPath){
         SQLiteDatabase dbTest = null;
 
         try{
             dbTest = SQLiteDatabase.openDatabase(dbPath,null,SQLiteDatabase.OPEN_READONLY);
             dbTest.close();
-            System.out.println("Database does exists");
         }
         catch(Exception ex){
-            System.out.println("Database does not exist");
         }
         return dbTest != null;
     }
 
+    /**
+     * Method used to add a user into the database (UserTable) by constructing values to add.
+     * @param values the arguments to add into the database
+     * @return long id >0 inserted
+     */
     public long insertUser(ContentValues values){
         long id = sqlDB.insert(tableUsers,"",values);
 
         return id;
     }
+
+    /**
+     * Method used to add a new game into the database (GameTable) by constructing the values to add.
+     * @param values list of arguments to add to the database
+     * @return long id > 0 instered
+     */
     public long insertGame(ContentValues values){
         long id = sqlDB.insert(tableGames,"",values);
-
         return id;
     }
-    public void queryGameTable(String query){
-        sqlDB.execSQL(query);
 
+    /**
+     * Open Method that allows for full String SQL queries to be used, returns void.
+     * @param query full String SQL query
+     */
+    public void queryGameTable(String query){sqlDB.execSQL(query);}
 
-    }
-
-    /*
-    query the games table
-
+    /**
+     * Method that queries the Game table using verious parameters.
+     * @param columns String array of colomns as named in the table
+     * @param where String value of the selection statement after the SQL Where
+     * @param whereArgs String array of the where arguments in order to fill in the ? ? ?
+     * @param sortOrder String value of what to sort the returned values by
+     * @return Database cursor returned to iterate through the values received
      */
     public Cursor queryGame(String[]columns, String where, String[]whereArgs, String sortOrder){
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
@@ -125,7 +158,15 @@ public class DBManager {
         return cursor;
     }
 
-    //query for user table
+
+    /**
+     * Method that queries the User table using verious user defined parameters.
+     * @param projection String array of the coloumn names
+     * @param selection String value of the where arguments
+     * @param selectArgs String value of arguments to be used in the where arguments ? ? ?
+     * @param sortOrder String value of the way to sort the returned values
+     * @return Database curosr returned to iterate through the values recieved from the query
+     */
     public Cursor queryUser(String[]projection, String selection, String[]selectArgs, String sortOrder){
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(tableUsers);
@@ -136,17 +177,33 @@ public class DBManager {
         return cursor;
     }
 
+    /**
+     * Getter method used to return the value of the main user for the DBManager in lowercase
+     * @return String value of the user in lowercase.
+     */
     public static String getUser(){return mainUser.toLowerCase();}
 
 
+    /**
+     * Inner helper class that is used to interface with the database and build or update the
+     * tables within.
+     */
     public static class DatabaseHelper extends SQLiteOpenHelper{
         private Context context;
 
+        /**
+         * Constructor that takes a single argument.
+         * @param context this or getApplicationContext()
+         */
         public DatabaseHelper(Context context){
             super(context,dbName,null,dbVersion);
             this.context = context;
         }
 
+        /**
+         * Override method call to create the database with default tables
+         * @param db SQLiteDatabase parameter
+         */
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(buildUserTable);
@@ -154,6 +211,12 @@ public class DBManager {
 
         }
 
+        /**
+         * Override upgrade method that will update the database and version, currently only placeholder
+         * @param db
+         * @param i
+         * @param i1
+         */
         @Override
         public void onUpgrade(SQLiteDatabase db, int i, int i1) {
 

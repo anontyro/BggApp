@@ -107,6 +107,7 @@ public class WebBrowserActivity extends AppCompatActivity {
         wbBrowser.getSettings().setLoadWithOverviewMode(true);
         wbBrowser.getSettings().setDomStorageEnabled(true);
         wbBrowser.getSettings().setUseWideViewPort(true);
+        wbBrowser.setVerticalScrollBarEnabled(true);
 
         //setup the bundle of data sent from the main list activity to allow the correct pages to be viewed
         Bundle b = getIntent().getExtras(); //create the bundle
