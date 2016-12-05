@@ -69,12 +69,16 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
     }
 
     public void checkPrimeUserExists(){
+        userData = userRef.loadData();
+
 
         if(DBManager.databaseExists() ==true){
             buCreateUser.setVisibility(View.GONE);
+            if(userData.contains("No user created")) {
+
+            }
         }
 
-        userData = userRef.loadData();
         if(!userData.contains("No user created")) {
             String[]dataArray = userData.split("\n");
             System.out.println(userData.toString());

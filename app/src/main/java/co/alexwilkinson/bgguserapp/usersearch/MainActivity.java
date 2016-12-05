@@ -2,7 +2,9 @@ package co.alexwilkinson.bgguserapp.usersearch;
 
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -61,8 +63,6 @@ public class MainActivity extends HeaderActivity
         //setup the objects to be callable
         lvCollection = (ListView) findViewById(R.id.lvCollection);
         etFindUser = (EditText) findViewById(R.id.etFindUser);
-        bundle = getIntent().getExtras();
-        checkForUpdate();
 
 
 
@@ -75,19 +75,34 @@ public class MainActivity extends HeaderActivity
      */
     public void buSearch(View view) {
         String user = etFindUser.getText().toString(); //gets the username from the search box
-        getGames = new RetrieveFeed(user); //creates a new instance of RetrieveFeed AsyncTask
-        /*
-        execute the getGames task, by using .get() we force the application to run immediatly
-        and pull the results stright away
-        add .execute().get() to force the application to run now
-         */
+        Context context = getApplicationContext();
+        ProcessFeed getFeed = new ProcessFeed(user,context);
         try {
-            getGames.execute().get();
+            getFeed.execute().get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+        userTotal = getFeed.getTotal();
+        bgList = getFeed.getboardgameList();
+        System.out.println(userTotal);
+        myadapter = new MyListAdapter(bgList);
+        lvCollection.setAdapter(myadapter);
+
+//        getGames = new RetrieveFeed(user); //creates a new instance of RetrieveFeed AsyncTask
+//        /*
+//        execute the getGames task, by using .get() we force the application to run immediatly
+//        and pull the results stright away
+//        add .execute().get() to force the application to run now
+//         */
+//        try {
+//            getGames.execute().get();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
     }
 
     //button used to save the current user selected in the list, if no prime user exists then
@@ -160,7 +175,7 @@ public class MainActivity extends HeaderActivity
             String user = username;
             etFindUser.setText(username);
             lvCollection.setAdapter(null);
-            RetrieveFeed getGames = new RetrieveFeed(user);
+            ProcessFeed getGames = new ProcessFeed(user);
             //add .execute().get() to force the application to run now
             try {
                 getGames.execute().get();
@@ -246,21 +261,21 @@ public class MainActivity extends HeaderActivity
         /*
         Calling the user ref file to save the basic user info for easy quick access of the basics
          */
+        UserRef userRef = new UserRef(this);
+        //TODO need to figure out why this is not updating currently with if statement
         if(DBManager.databaseExists() == false){
-            UserRef userRef = new UserRef(this);
             userRef.saveData(username, userTotal);
         }
 
-        values = new
-
-                ContentValues();
+        values = new ContentValues();
 
         values.put(DBManager.colUsername, username);
         values.put(DBManager.colTotalGames, userTotal);
         values.put(DBManager.colPrimaryUser, isprime);
 
         //create a new async task to save the users boardgame collection
-        SaveUser newUser = new SaveUser();
+        Context context = getApplicationContext();
+        SaveCurrentUser newUser = new SaveCurrentUser(username,bgList,context);
         System.out.println("Save users games now!");
         newUser.execute();
 

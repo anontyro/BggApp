@@ -1,5 +1,7 @@
 package co.alexwilkinson.bgguserapp.usersearch;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Process;
 
@@ -18,11 +20,16 @@ import java.util.ArrayList;
 
 public class ProcessFeed extends AsyncTask{
 
-    private ArrayList<BoardgameListItem>boardggameList;
+    private ArrayList<BoardgameListItem>boardggameList = new ArrayList<>();
     private String username;
     private String bgg = "http://www.boardgamegeek.com/xmlapi2/";
     private String collection = "collection?username=";
     private URL url;
+    private int total = 0;
+    private Integer[]statusElements;
+    private ProgressDialog progressDialog;
+    private Context context;
+    ArrayList<Integer[]> statusList = new ArrayList<>();
 
     public ProcessFeed(String username){
         this.username = username;
@@ -32,17 +39,28 @@ public class ProcessFeed extends AsyncTask{
             ex.getStackTrace();
         }
     }
+    public ProcessFeed(String username, Context context){
+        this.username = username;
+        this.context = context;
+        try{
+            url = new URL(bgg+collection+username);
+        }catch(Exception ex){
+            ex.getStackTrace();
+        }
+    }
 
     @Override
     protected void onPreExecute() {
-
         super.onPreExecute();
+//        progressDialog = new ProgressDialog();
+//        progressDialog.setMessage("loading");
+//        progressDialog.show();
+
     }
 
     @Override
     protected Object doInBackground(Object[] params) {
-        String bgTitle,bgID,published,thumbnail,total;
-        Integer[]statusElements;
+        String bgTitle = "",bgID = "",published = "",thumbnail = "";
 
         try{
             XmlPullParserFactory xmlFactory = XmlPullParserFactory.newInstance();
@@ -65,31 +83,60 @@ public class ProcessFeed extends AsyncTask{
                         bgID = xpp.getAttributeValue(1);
                     }
                     else if(xpp.getName().equalsIgnoreCase("yearpublished")){
-
+                        published = xpp.nextText();
                     }
                     else if(xpp.getName().equalsIgnoreCase("thumbnail")){
-
+                        thumbnail = xpp.nextText();
                     }
-                    else if(xpp.getName().equalsIgnoreCase("item")){
-
+                    else if(xpp.getName().equalsIgnoreCase("items")){
+                        total = Integer.parseInt(xpp.getAttributeValue(0));
                     }
                     else if(xpp.getName().equalsIgnoreCase("status")){
-
+                        statusElements = new Integer[]{
+                                Integer.parseInt(xpp.getAttributeValue(0)), //owned
+                                Integer.parseInt(xpp.getAttributeValue(4)), //wants to play
+                                Integer.parseInt(xpp.getAttributeValue(6)), //wishlist
+                        };
+                        statusList.add(statusElements);
                     }
+                    if(!bgTitle.equalsIgnoreCase("") &&
+                            !bgID.equalsIgnoreCase("")&&
+                            !published.equalsIgnoreCase("")&&
+                            !thumbnail.equalsIgnoreCase("")
+                            ) {
 
+
+                        boardggameList.add(new BoardgameListItem(
+                                bgTitle, published, bgID,thumbnail
+                        ));
+                        bgID = "";
+                        published="";
+                        thumbnail="";
+                    }
                 }
+                eventType = xpp.next();
             }
 
         }catch(Exception ex){
-
+            ex.getStackTrace();
         }
 
-        return null;
+        for(int i =0; i < boardggameList.size(); i++){
+            BoardgameListItem item = boardggameList.get(i);
+            Integer[] status = statusList.get(i);
+
+            item.addStatus(status[0],status[1],status[2]);
+        }
+
+        return boardggameList;
     }
 
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
+        if(progressDialog != null){
+            progressDialog.dismiss();
+        }
     }
 
     @Override
@@ -105,6 +152,10 @@ public class ProcessFeed extends AsyncTask{
             return null;
         }
     }
+
+    public int getTotal(){return total;}
+
+    public ArrayList<BoardgameListItem>getboardgameList(){return boardggameList;}
 
 
 
