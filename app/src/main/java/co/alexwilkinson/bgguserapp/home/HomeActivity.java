@@ -17,7 +17,7 @@ import co.alexwilkinson.bgguserapp.usersearch.MainActivity;
  * the main splash screen for where users can be directed
  */
 public class HomeActivity extends HeaderActivity implements View.OnClickListener{
-    Button buSearchUser, buUserHome, buCreateUser;
+    Button buSearchUser, buUserHome, buCreateUser, buUpdateUser;
     TextView tvUser;
     UserRef userRef;
     String userData;
@@ -36,6 +36,10 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         buUserHome.setOnClickListener(this);
 
         buCreateUser = (Button)findViewById(R.id.buCreateUser);
+        buCreateUser.setOnClickListener(this);
+
+        buUpdateUser = (Button)findViewById(R.id.buPrimeUpdate);
+        buUpdateUser.setOnClickListener(this);
 
         checkPrimeUserExists();
 
@@ -54,8 +58,12 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
             Intent intent = new Intent(getApplicationContext(), UserAreaMainActivity.class);
             startActivity(intent);
 
-        }
-        else if(value == R.id.buCreateUser){
+        }else if(value == R.id.buPrimeUpdate){
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.putExtra("request","update prime");
+            startActivity(intent);
+
+        }else if(value == R.id.buCreateUser){
 
         }
     }
@@ -79,6 +87,7 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
 
         if(userData.contains("No user created")){
             buUserHome.setEnabled(false);
+            buUpdateUser.setEnabled(false);
         }
     }
 }

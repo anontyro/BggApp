@@ -43,6 +43,7 @@ public class MainActivity extends HeaderActivity
     private DBManager dbManager;
     protected ContentValues values;
     protected RetrieveFeed getGames;
+    private Bundle bundle;
 
     //title, description, image(String)
     public static ArrayList<BoardgameListItem> bgList = new ArrayList<>();
@@ -60,6 +61,9 @@ public class MainActivity extends HeaderActivity
         //setup the objects to be callable
         lvCollection = (ListView) findViewById(R.id.lvCollection);
         etFindUser = (EditText) findViewById(R.id.etFindUser);
+        bundle = getIntent().getExtras();
+        checkForUpdate();
+
 
 
     }
@@ -173,6 +177,27 @@ public class MainActivity extends HeaderActivity
             createNewUser(username, userTotal, true);
         } else {
             Toast.makeText(this, "Search for the user first to ensure they exist", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void checkForUpdate(){
+        if(bundle != null) {
+            if(bundle.get("request").equals("update prime")){
+
+                UserRef userRef = new UserRef(this);
+                String userdata = userRef.loadData();
+                String[]primeData = userdata.split("\n");
+                getGames = new RetrieveFeed(primeData[0]);
+                try {
+                    getGames.execute().get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("update prime user");
+            }
         }
     }
 
@@ -366,19 +391,25 @@ public class MainActivity extends HeaderActivity
 //---------------------------------------------------------------------------------
 
         /**
-         *
-         * @param username
+         * method to setup the URL to retrieve the users collection from BGG.
+         * @param username BGG username
          */
         public RetrieveFeed(String username) {
-            this.username = username;
+            this.username = username; //set the username
             try {
-                url = new URL(bgg + collection + username);
+                url = new URL(bgg + collection + username); //construct the URL
             } catch (Exception ex) {
                 ex.getStackTrace();
             }
 
         }
 
+        /**
+         * Override method for the main background task which will pull the XML and start to
+         * generate the BoardgameListItem to be sent to the ListView.
+         * @param objects
+         * @return Array List name which contains all the boardgame names
+         */
         @Override
         protected Object doInBackground(Object[] objects) {
 
@@ -415,7 +446,8 @@ public class MainActivity extends HeaderActivity
 //                        pull the thumnail tag
                         else if (xpp.getName().equalsIgnoreCase("thumbnail")) {
                             imageList.add(xpp.nextText());
-                        } else if (xpp.getName().equalsIgnoreCase("items")) {
+                        }
+                        else if (xpp.getName().equalsIgnoreCase("items")) {
                             userTotal = Integer.parseInt(xpp.getAttributeValue(0));
                         }
                         //will check all the status namespace for the items to add to the ArrayList<Integer[]>()
@@ -493,26 +525,51 @@ public class MainActivity extends HeaderActivity
             }
         }
 
+        /**
+         * Getter method to return the set bgg username.
+         * @return String username
+         */
         public String getUsername() {
             return username;
         }
 
+        /**
+         * Getter method to return the complete list of boardgame names from the users collection.
+         * @return ArrayList of boardgame names.
+         */
         public ArrayList<String> getGameList() {
             return name;
         }
 
+        /**
+         * Getter method to return the complete list of release dates of the boardgames.
+         * @return ArrayList complete list of release dates for the games as strings
+         */
         public ArrayList<String> getDetailList() {
             return released;
         }
 
+        /**
+         * Getter method to return the complete list of gameIDs from bgg.
+         * @return ArrayList complete list of bgg gameIDs in String format.
+         */
         public ArrayList<String> getGameID() {
             return gameID;
         }
 
+        /**
+         * Getter method to return the complete list of status' with owned, wants to play, wishlish
+         * 0 is false and 1 is true;
+         * @return Arraylist of Array intergers.
+         */
         public ArrayList<Integer[]> getStatusList() {
             return statusList;
         }
 
+        /**
+         *Getter method to return an ArrayList of image URLs from bgg.
+         * @return ArrayList made up of Strings.
+         */
         public ArrayList<String> getimageList() {
             return imageList;
         }
@@ -542,6 +599,10 @@ public class MainActivity extends HeaderActivity
 
     }
 
+    /**
+     * AsyncTask that pulls all of the game collection data from the displayed list to be added
+     * to the database table.
+     */
     public class SaveUser extends AsyncTask {
         String username = getGames.getUsername();
         ArrayList<String> gameList = getGames.getGameList();
@@ -551,6 +612,10 @@ public class MainActivity extends HeaderActivity
         ArrayList<String> gameImageList = getGames.getimageList();
         String addUserQuery;
 
+        /**
+         * Override method for preExecute that will check to see if the game list is zero, if it is
+         * it will cancel the process.
+         */
         @Override
         protected void onPreExecute() {
             if (gameList.size() == 0) {
@@ -558,17 +623,31 @@ public class MainActivity extends HeaderActivity
             }
         }
 
+        /**
+         * Override doInBackground main task that will add the user collection to the database
+         * calls the addUser() method.
+         * @param objects
+         * @return
+         */
         @Override
         protected Object doInBackground(Object[] objects) {
             addUser();
             return null;
         }
 
+        /**
+         * No change to default.
+         * @param values
+         */
         @Override
         protected void onProgressUpdate(Object[] values) {
             super.onProgressUpdate(values);
         }
 
+        /**
+         * No change to default.
+         * @param o
+         */
         @Override
         protected void onPostExecute(Object o) {
 
@@ -579,11 +658,9 @@ public class MainActivity extends HeaderActivity
          * method that will take the all of the data stored from the XML
          * and start to get it ready to commit to the database.
          *
-         * @return
+         * @return void
          */
-
-
-        protected void addUser() {
+         protected void addUser() {
 
 
             ContentValues values = new ContentValues();
@@ -602,32 +679,7 @@ public class MainActivity extends HeaderActivity
                 if (statusValues[2] != 0) {
                     wishlist = "true";
                 }
-
-//                addUserQuery += "INSERT INTO " + DBManager.tableGames
-//                        + " ('"+DBManager.colForUsername+"'," +
-//                        "'"+DBManager.colTitle+"'," +
-//                        "'"+DBManager.colReleased+"'," +
-//                        "'"+DBManager.colImage+"'," +
-//                        "'"+DBManager.colID+"'," +
-//                        "'"+DBManager.colBggPage+"'," +
-//                        "'"+DBManager.colOwned+"'," +
-//                        "'"+DBManager.colWantToPlay+"'," +
-//                        "'"+DBManager.colWishlist+"') "
-//
-//                        +"VALUES"+
-//
-//                        "('"+username+"'," +
-//                        "'"+gameList.get(i)+"'," +
-//                        "'"+gameDetailList.get(i)+"'," +
-//                        "'"+gameImageList.get(i)+"'," +
-//                        "'"+gameIDList.get(i)+"'," +
-//                        "'"+"https://boardgamegeek.com/boardgame/"+gameIDList.get(i)+"'," +
-//                        "'"+owned+"'," +
-//                        "'"+wantsToPlay+"'," +
-//                        "'"+wishlist+"'); \n"
-//                ;
-
-
+                //list of values to add to the database compiled
                 values.put(DBManager.colForUsername, username);
                 values.put(DBManager.colTitle, gameList.get(i));
                 values.put(DBManager.colReleased, gameDetailList.get(i));

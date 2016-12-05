@@ -93,8 +93,9 @@ public class WebBrowserActivity extends AppCompatActivity {
         }
     };
 
-    /*
-    code that runs to create the web browser instance
+    /**
+     * Core create code that will initilise the class and create an instance of the web browser
+     * @param savedInstanceState
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,21 +118,20 @@ public class WebBrowserActivity extends AppCompatActivity {
         progressBar = (ProgressBar)findViewById(R.id.progress_bar);
         progressBar.setMax(100);
 
-
         //give the WebView a WebClientView to override the open external browser when navigating
-        wbBrowser.setWebViewClient(new myWebView());
+        wbBrowser.setWebViewClient(new myWebView(){
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return false;
+            }
+        });
         wbBrowser.loadUrl(url); //creates the webpage
         WebBrowserActivity.this.progressBar.setProgress(0); //set the progress bar to 0
-
-
-
 
 
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
-
-
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -206,6 +206,10 @@ public class WebBrowserActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Private inner class that is used to force the webbrowser Activity to load pages from within
+     * preventing a call to open an external browser
+     */
     private class myWebView extends WebViewClient{
 
         @Override

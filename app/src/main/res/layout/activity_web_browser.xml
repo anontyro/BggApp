@@ -11,15 +11,11 @@
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
-    <WebView
+    <ScrollView
         android:layout_width="match_parent"
-        android:id="@+id/webview_browser"
-        android:layout_height="match_parent" />
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="100px"
-        android:layout_gravity="center"
-        android:layout_height="100px" />
+        android:layout_height="match_parent">
+
+    </ScrollView>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -27,30 +23,40 @@
         android:fitsSystemWindows="true"
         android:id="@+id/fullscreen_content">
 
-        <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
+
+        <WebView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
+            android:id="@+id/webview_browser"
+            android:layout_height="match_parent" />
 
-            <Button
-                android:background="@android:color/transparent"
-                android:id="@+id/button_close"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="buClose"
-                android:text="@string/button_close" />
-
-
-
-        </LinearLayout>
-
-
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="100px"
+            android:layout_gravity="center"
+            android:layout_height="100px" />
     </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/fullscreen_content_controls"
+        style="?metaButtonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@color/black_overlay"
+        android:orientation="horizontal"
+        tools:ignore="UselessParent">
+
+        <Button
+            android:background="@android:color/transparent"
+            android:id="@+id/button_close"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="buClose"
+            android:text="@string/button_close" />
+
+
+
+    </LinearLayout>
 
 </FrameLayout>

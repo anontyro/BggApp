@@ -34,10 +34,10 @@
             android:id="@+id/buUserArea" />
 
         <Button
-            android:text="Button"
+            android:text="@string/bu_home_update_prime_user"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/button4" />
+            android:id="@+id/buPrimeUpdate" />
 
         <Button
             android:text="Button"
