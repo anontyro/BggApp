@@ -2,6 +2,7 @@ package co.alexwilkinson.bgguserapp.userarea;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import co.alexwilkinson.bgguserapp.HeaderActivity;
 import co.alexwilkinson.bgguserapp.R;
 import co.alexwilkinson.bgguserapp.utilities.DBManager;
+import co.alexwilkinson.bgguserapp.utilities.FontManager;
 import co.alexwilkinson.bgguserapp.utilities.UserRef;
 import co.alexwilkinson.bgguserapp.utilities.WebBrowserActivity;
 
@@ -40,11 +42,18 @@ public class UserAreaMainActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_area_main);
 
+        Typeface iconFA = FontManager.getTypeface(getApplicationContext(),FontManager.FONTAWESOME);
+
         userRef = new UserRef(this);
         String[]userData = (userRef.loadData()).split("\n");
 
         spUser = (Spinner)findViewById(R.id.spUserArea);
         lvUserGames = (ListView)findViewById(R.id.lvUserGames);
+
+        Button refreshGames = (Button)findViewById(R.id.buUserAreaRefresh);
+        refreshGames.setTypeface(iconFA);
+
+        final TextView userTotal = (TextView)findViewById(R.id.tvUserAreaTotal);
 
         users = populateUser(userData[0]);
 
@@ -60,9 +69,12 @@ public class UserAreaMainActivity extends HeaderActivity {
                 if(userGames.size() !=0) {
                     myadapter = new MainListAdapter(userGames);
                     lvUserGames.setAdapter(myadapter);
-                    Toast.makeText(getApplicationContext(), users.get(i), Toast.LENGTH_LONG).show();
-                    System.out.println(userGames.size());
-                    System.out.println(userGames.toString());
+
+                    userTotal.setText("Total: "+userGames.size());
+
+                    Toast.makeText(getApplicationContext(),
+                            users.get(i)+" has a total of: "+userGames.size(),
+                            Toast.LENGTH_LONG).show();
                 }
             }
 

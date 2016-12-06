@@ -161,17 +161,17 @@ public class DBManager {
 
     /**
      * Method that queries the User table using verious user defined parameters.
-     * @param projection String array of the coloumn names
-     * @param selection String value of the where arguments
-     * @param selectArgs String value of arguments to be used in the where arguments ? ? ?
+     * @param columns String array of the coloumn names
+     * @param where String value of the where arguments
+     * @param whereArgs String value of arguments to be used in the where arguments ? ? ?
      * @param sortOrder String value of the way to sort the returned values
      * @return Database curosr returned to iterate through the values recieved from the query
      */
-    public Cursor queryUser(String[]projection, String selection, String[]selectArgs, String sortOrder){
+    public Cursor queryUser(String[]columns, String where, String[]whereArgs, String sortOrder){
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(tableUsers);
 
-        Cursor cursor = qb.query(sqlDB,projection,selection,selectArgs,null,null,sortOrder);
+        Cursor cursor = qb.query(sqlDB,columns,where,whereArgs,null,null,sortOrder);
 
 
         return cursor;

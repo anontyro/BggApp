@@ -49,12 +49,14 @@ public class ProcessFeed extends AsyncTask{
         }
     }
 
+//TODO try to get the loading dialog working within this
     @Override
     protected void onPreExecute() {
-        super.onPreExecute();
-//        progressDialog = new ProgressDialog();
-//        progressDialog.setMessage("loading");
-//        progressDialog.show();
+        if(context!= null) {
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setMessage("loading...");
+            progressDialog.show();
+        }
 
     }
 

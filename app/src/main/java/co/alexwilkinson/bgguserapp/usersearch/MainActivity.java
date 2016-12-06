@@ -44,8 +44,7 @@ public class MainActivity extends HeaderActivity
     protected int userTotal;
     private DBManager dbManager;
     protected ContentValues values;
-    protected RetrieveFeed getGames;
-    private Bundle bundle;
+    private ProgressDialog progressDialog;
 
     //title, description, image(String)
     public static ArrayList<BoardgameListItem> bgList = new ArrayList<>();
@@ -74,11 +73,12 @@ public class MainActivity extends HeaderActivity
      * @param view
      */
     public void buSearch(View view) {
+
         String user = etFindUser.getText().toString(); //gets the username from the search box
-        Context context = getApplicationContext();
-        ProcessFeed getFeed = new ProcessFeed(user,context);
+        Context context = MainActivity.this;
+        ProcessFeed getFeed = new ProcessFeed(user, context);
         try {
-            getFeed.execute().get();
+            getFeed.execute(MainActivity.this).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -90,23 +90,7 @@ public class MainActivity extends HeaderActivity
         myadapter = new MyListAdapter(bgList);
         lvCollection.setAdapter(myadapter);
 
-//        getGames = new RetrieveFeed(user); //creates a new instance of RetrieveFeed AsyncTask
-//        /*
-//        execute the getGames task, by using .get() we force the application to run immediatly
-//        and pull the results stright away
-//        add .execute().get() to force the application to run now
-//         */
-//        try {
-//            getGames.execute().get();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
     }
-
-    //button used to save the current user selected in the list, if no prime user exists then
-    //the button will throw a dialog to ask to add one and create the database
 
     /**
      * Main way to save the user data to the local database, this button checks the user has been searched
@@ -131,8 +115,6 @@ public class MainActivity extends HeaderActivity
                 if (exists == false) {
                     createNewUser(etFindUser.getText().toString(), userTotal, false);
                 }
-
-
             } else {
                 System.out.println("user not checked");
 
@@ -140,11 +122,9 @@ public class MainActivity extends HeaderActivity
         }
     }
 
-
     /**
      * Implemented from the CreateUserDialogFrame, event that is fired from the pressing of the
      * positive button, not currently used.
-     *
      * @param dialog
      */
     @Override
@@ -154,7 +134,6 @@ public class MainActivity extends HeaderActivity
     /**
      * Implemented from the CreateUserDialogFrame, event that is fired from the pressing of the
      * negative button, no currently used.
-     *
      * @param dialog
      */
     @Override
@@ -164,7 +143,6 @@ public class MainActivity extends HeaderActivity
     /**
      * Implemented from the CreateUserDialogFrame, event that is fired at the end of the dialog session
      * these values are returned at the end.
-     *
      * @param username String that relates to the user to add.
      */
     @Override
@@ -192,27 +170,6 @@ public class MainActivity extends HeaderActivity
             createNewUser(username, userTotal, true);
         } else {
             Toast.makeText(this, "Search for the user first to ensure they exist", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public void checkForUpdate(){
-        if(bundle != null) {
-            if(bundle.get("request").equals("update prime")){
-
-                UserRef userRef = new UserRef(this);
-                String userdata = userRef.loadData();
-                String[]primeData = userdata.split("\n");
-                getGames = new RetrieveFeed(primeData[0]);
-                try {
-                    getGames.execute().get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-
-                System.out.println("update prime user");
-            }
         }
     }
 
@@ -383,336 +340,5 @@ public class MainActivity extends HeaderActivity
         }
     }
 
-
-    /**
-     * class that is used to retrieve that data from the XML of Board Game Geek user collection
-     * public accessible methods getNameList, getDetailList, getImageList
-     */
-    public class RetrieveFeed extends AsyncTask {
-
-        //Vars to be setup ------------------------------------------------
-        String bgg = "http://www.boardgamegeek.com/xmlapi2/";
-        String collection = "collection?username=";
-        String username = "";
-        URL url;
-        ContentValues values;
-
-        ArrayList<String> name = new ArrayList<>();
-        ArrayList<String> released = new ArrayList<>();
-        ArrayList<String> gameID = new ArrayList<>();
-        ArrayList<Integer[]> statusList = new ArrayList<>();
-        //        ArrayList<String> LengthList = new ArrayList<>();
-        ArrayList<String> imageList = new ArrayList<>();
-//---------------------------------------------------------------------------------
-
-        /**
-         * method to setup the URL to retrieve the users collection from BGG.
-         * @param username BGG username
-         */
-        public RetrieveFeed(String username) {
-            this.username = username; //set the username
-            try {
-                url = new URL(bgg + collection + username); //construct the URL
-            } catch (Exception ex) {
-                ex.getStackTrace();
-            }
-
-        }
-
-        /**
-         * Override method for the main background task which will pull the XML and start to
-         * generate the BoardgameListItem to be sent to the ListView.
-         * @param objects
-         * @return Array List name which contains all the boardgame names
-         */
-        @Override
-        protected Object doInBackground(Object[] objects) {
-
-            //create the controls to parse the XML using XmlPullParser
-            try {
-                XmlPullParserFactory xmlFactory = XmlPullParserFactory.newInstance();
-                xmlFactory.setNamespaceAware(true);
-
-                XmlPullParser xpp = xmlFactory.newPullParser();
-
-                //set the input url stream to use
-                xpp.setInput(getInputStream(url), "UTF_8");
-
-
-                int eventType = xpp.getEventType();
-
-                //create a while loop to keep going until teh end of the XML document
-//                while( eventType != XmlPullParser.END_DOCUMENT){
-                while (eventType != XmlPullParser.END_DOCUMENT) {
-                    if (eventType == XmlPullParser.START_TAG) {
-
-                        //check for name of the game using tage
-                        if (xpp.getName().equalsIgnoreCase("name")) {
-                            name.add(xpp.nextText());
-                        }
-                        //check for the board game ID in item namespace
-                        else if (xpp.getName().equalsIgnoreCase("item")) {
-                            gameID.add(xpp.getAttributeValue(1));
-                        }
-                        //check the year published tag
-                        else if (xpp.getName().equalsIgnoreCase("yearpublished")) {
-                            released.add(xpp.nextText());
-                        }
-//                        pull the thumnail tag
-                        else if (xpp.getName().equalsIgnoreCase("thumbnail")) {
-                            imageList.add(xpp.nextText());
-                        }
-                        else if (xpp.getName().equalsIgnoreCase("items")) {
-                            userTotal = Integer.parseInt(xpp.getAttributeValue(0));
-                        }
-                        //will check all the status namespace for the items to add to the ArrayList<Integer[]>()
-                        // if return zero then false one is true
-                        else if (xpp.getName().equalsIgnoreCase("status")) {
-                            Integer[] statusElements = {
-                                    Integer.parseInt(xpp.getAttributeValue(0)), //owned
-                                    Integer.parseInt(xpp.getAttributeValue(4)), //wants to play
-                                    Integer.parseInt(xpp.getAttributeValue(6)), //wishlist
-
-                            };
-                            statusList.add(statusElements);
-                        }
-                        //check the status tag and namespaces within it
-//                        else if(xpp.getName().equalsIgnoreCase("status")){
-//                            System.out.println(
-//                                    "namespace = " + xpp.getAttributeName(1) + " = " + xpp.getAttributeValue(1) +"\n" +
-//                                            "namespace  = " + xpp.getAttributeName(0) + " = " + xpp.getAttributeValue(0)
-//
-//                            );
-//
-//                        }
-
-                    }
-                    //moves the XML to the next tag to parse
-                    eventType = xpp.next();
-                }
-
-                //call the method to add the values to the main BoardgameList
-                bgList = addToGameList();
-
-
-            } catch (Exception ex) {
-                ex.getStackTrace();
-            }
-
-            return name;
-        }
-
-        /*
-        postprocessing which will link the listview to the adapter created to display the content
-        A toast is also given to state how many items the user has in their list
-         */
-        @Override
-        protected void onPostExecute(Object o) {
-            if (name.size() != 0) {
-
-                myadapter = new MyListAdapter(bgList);
-                lvCollection.setAdapter(myadapter);
-
-
-                Toast.makeText(getApplicationContext(),
-                        etFindUser.getText().toString() + " has a Total of : " + userTotal +
-                                " games on board game geek",
-                        Toast.LENGTH_LONG).show();
-
-            } else {
-                Toast.makeText(getApplicationContext(),
-                        "Error data could not be retrieved, check username and connection, and try again",
-                        Toast.LENGTH_LONG).show();
-                etFindUser.setText("");
-            }
-
-        }
-
-        //getter methods used to reteive values created for use later
-
-        protected InputStream getInputStream(URL url) {
-            try {
-                return url.openConnection().getInputStream();
-
-            } catch (Exception ex) {
-                ex.getStackTrace();
-                return null;
-            }
-        }
-
-        /**
-         * Getter method to return the set bgg username.
-         * @return String username
-         */
-        public String getUsername() {
-            return username;
-        }
-
-        /**
-         * Getter method to return the complete list of boardgame names from the users collection.
-         * @return ArrayList of boardgame names.
-         */
-        public ArrayList<String> getGameList() {
-            return name;
-        }
-
-        /**
-         * Getter method to return the complete list of release dates of the boardgames.
-         * @return ArrayList complete list of release dates for the games as strings
-         */
-        public ArrayList<String> getDetailList() {
-            return released;
-        }
-
-        /**
-         * Getter method to return the complete list of gameIDs from bgg.
-         * @return ArrayList complete list of bgg gameIDs in String format.
-         */
-        public ArrayList<String> getGameID() {
-            return gameID;
-        }
-
-        /**
-         * Getter method to return the complete list of status' with owned, wants to play, wishlish
-         * 0 is false and 1 is true;
-         * @return Arraylist of Array intergers.
-         */
-        public ArrayList<Integer[]> getStatusList() {
-            return statusList;
-        }
-
-        /**
-         *Getter method to return an ArrayList of image URLs from bgg.
-         * @return ArrayList made up of Strings.
-         */
-        public ArrayList<String> getimageList() {
-            return imageList;
-        }
-
-//        public ArrayList<String> getLengthList(){return lengthList;}
-
-
-        /*
-        Method to add all of the values to the BoardgameListItem to be displayed in the ListView
-         */
-        private ArrayList<BoardgameListItem> addToGameList() {
-            bgList = new ArrayList<>(name.size());
-            for (int i = 0; i < name.size(); i++) {
-
-                bgList.add(new BoardgameListItem(
-                        name.get(i),
-                        released.get(i),
-                        gameID.get(i)
-                ));
-
-            }
-            System.out.println("data added to list");
-            System.out.println("values: " + values);
-            return bgList;
-        }
-
-
-    }
-
-    /**
-     * AsyncTask that pulls all of the game collection data from the displayed list to be added
-     * to the database table.
-     */
-    public class SaveUser extends AsyncTask {
-        String username = getGames.getUsername();
-        ArrayList<String> gameList = getGames.getGameList();
-        ArrayList<String> gameDetailList = getGames.getDetailList();
-        ArrayList<String> gameIDList = getGames.getGameID();
-        ArrayList<Integer[]> gameStatusList = getGames.getStatusList();
-        ArrayList<String> gameImageList = getGames.getimageList();
-        String addUserQuery;
-
-        /**
-         * Override method for preExecute that will check to see if the game list is zero, if it is
-         * it will cancel the process.
-         */
-        @Override
-        protected void onPreExecute() {
-            if (gameList.size() == 0) {
-                cancel(true);
-            }
-        }
-
-        /**
-         * Override doInBackground main task that will add the user collection to the database
-         * calls the addUser() method.
-         * @param objects
-         * @return
-         */
-        @Override
-        protected Object doInBackground(Object[] objects) {
-            addUser();
-            return null;
-        }
-
-        /**
-         * No change to default.
-         * @param values
-         */
-        @Override
-        protected void onProgressUpdate(Object[] values) {
-            super.onProgressUpdate(values);
-        }
-
-        /**
-         * No change to default.
-         * @param o
-         */
-        @Override
-        protected void onPostExecute(Object o) {
-
-
-        }
-
-        /**
-         * method that will take the all of the data stored from the XML
-         * and start to get it ready to commit to the database.
-         *
-         * @return void
-         */
-         protected void addUser() {
-
-
-            ContentValues values = new ContentValues();
-            System.out.println("Started to add values " + gameList.size());
-            for (int i = 0; i < gameList.size(); i++) {
-                String wishlist = "false";
-                String wantsToPlay = "false";
-                String owned = "false";
-                Integer[] statusValues = gameStatusList.get(i);
-                if (statusValues[0] != 0) {
-                    owned = "true";
-                }
-                if (statusValues[1] != 0) {
-                    wantsToPlay = "true";
-                }
-                if (statusValues[2] != 0) {
-                    wishlist = "true";
-                }
-                //list of values to add to the database compiled
-                values.put(DBManager.colForUsername, username);
-                values.put(DBManager.colTitle, gameList.get(i));
-                values.put(DBManager.colReleased, gameDetailList.get(i));
-                values.put(DBManager.colImage, gameImageList.get(i));
-                values.put(DBManager.colID, gameIDList.get(i));
-                values.put(DBManager.colBggPage, "https://boardgamegeek.com/boardgame/" + gameIDList.get(i));
-                values.put(DBManager.colOwned, owned);
-                values.put(DBManager.colWantToPlay, wantsToPlay);
-                values.put(DBManager.colWishlist, wishlist);
-
-                long id = dbManager.insertGame(values);
-            }
-//            dbManager.queryGameTable(addUserQuery);
-
-
-        }
-
-
-    }
 
 }

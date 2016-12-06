@@ -1,6 +1,8 @@
 package co.alexwilkinson.bgguserapp.home;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +12,7 @@ import co.alexwilkinson.bgguserapp.userarea.UserAreaMainActivity;
 import co.alexwilkinson.bgguserapp.utilities.DBManager;
 import co.alexwilkinson.bgguserapp.HeaderActivity;
 import co.alexwilkinson.bgguserapp.R;
+import co.alexwilkinson.bgguserapp.utilities.FontManager;
 import co.alexwilkinson.bgguserapp.utilities.UserRef;
 import co.alexwilkinson.bgguserapp.usersearch.MainActivity;
 
@@ -21,11 +24,13 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
     TextView tvUser;
     UserRef userRef;
     String userData;
+    DBManager dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
 
         userRef = new UserRef(this);
 
@@ -41,7 +46,11 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         buUpdateUser = (Button)findViewById(R.id.buPrimeUpdate);
         buUpdateUser.setOnClickListener(this);
 
+
+
         checkPrimeUserExists();
+
+        System.out.println("who is prime "+whoIsPrime());
 
 
     }
@@ -75,13 +84,23 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         if(DBManager.databaseExists() ==true){
             buCreateUser.setVisibility(View.GONE);
             if(userData.contains("No user created")) {
-
+                String prime = whoIsPrime();
+                String[]primeArray = prime.split("\n");
+                userRef.saveData(primeArray[0],Integer.parseInt(primeArray[1]));
             }
         }
 
         if(!userData.contains("No user created")) {
             String[]dataArray = userData.split("\n");
             System.out.println(userData.toString());
+
+            String prime = whoIsPrime();
+            String[] primeArray = prime.split("\n");
+
+            if(!dataArray[0].equalsIgnoreCase(primeArray[0])){
+                userRef.saveData(primeArray[0],Integer.parseInt(primeArray[1]));
+            }
+
             tvUser = (TextView)findViewById(R.id.tvUser);
 
             tvUser.setText("Welcome back "+dataArray[0] + " you currently have " +dataArray[1]
@@ -94,4 +113,44 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
             buUpdateUser.setEnabled(false);
         }
     }
+
+    public String whoIsPrime(){
+        String output = "";
+
+        dbManager = new DBManager(this, "");
+
+        Cursor cursor = dbManager.queryUser(null,DBManager.colPrimaryUser+" =?" ,
+                new String[]{"1"},null);
+
+        if (cursor.moveToFirst()){
+            do{
+                output = cursor.getString(cursor.getColumnIndex(DBManager.colUsername)) + "\n";
+                output += cursor.getString(cursor.getColumnIndex(DBManager.colTotalGames));
+            }while(cursor.moveToNext());
+        }
+
+        return output;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
