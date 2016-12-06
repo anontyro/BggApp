@@ -2,10 +2,12 @@ package co.alexwilkinson.bgguserapp.userarea;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -19,9 +21,12 @@ import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import co.alexwilkinson.bgguserapp.HeaderActivity;
 import co.alexwilkinson.bgguserapp.R;
+import co.alexwilkinson.bgguserapp.usersearch.ProcessFeed;
+import co.alexwilkinson.bgguserapp.usersearch.SaveCurrentUser;
 import co.alexwilkinson.bgguserapp.utilities.DBManager;
 import co.alexwilkinson.bgguserapp.utilities.FontManager;
 import co.alexwilkinson.bgguserapp.utilities.UserRef;
@@ -29,12 +34,16 @@ import co.alexwilkinson.bgguserapp.utilities.WebBrowserActivity;
 
 public class UserAreaMainActivity extends HeaderActivity {
     protected Spinner spUser;
+    private Button refreshGames;
+
     protected DBManager dbManager;
     public UserRef userRef;
     public ArrayList<String>users;
     protected ArrayList<String>userGames;
     protected ListView lvUserGames;
     protected MainListAdapter myadapter;
+    private Typeface iconFA;
+    private String selectedUser= "";
 
 
     @Override
@@ -42,7 +51,7 @@ public class UserAreaMainActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_area_main);
 
-        Typeface iconFA = FontManager.getTypeface(getApplicationContext(),FontManager.FONTAWESOME);
+        iconFA = FontManager.getTypeface(getApplicationContext(),FontManager.FONTAWESOME);
 
         userRef = new UserRef(this);
         String[]userData = (userRef.loadData()).split("\n");
@@ -50,13 +59,75 @@ public class UserAreaMainActivity extends HeaderActivity {
         spUser = (Spinner)findViewById(R.id.spUserArea);
         lvUserGames = (ListView)findViewById(R.id.lvUserGames);
 
-        Button refreshGames = (Button)findViewById(R.id.buUserAreaRefresh);
-        refreshGames.setTypeface(iconFA);
+        refreshGames = (Button)findViewById(R.id.buUserAreaRefresh);
 
-        final TextView userTotal = (TextView)findViewById(R.id.tvUserAreaTotal);
+        setupRefreshButton();
 
         users = populateUser(userData[0]);
 
+        setupArrayAdapter();
+
+
+    }
+
+    private void setupRefreshButton(){
+        refreshGames.setTypeface(iconFA);
+
+        refreshGames.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    refreshGames.setTextColor(Color.BLACK);
+
+                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    refreshGames.setTextColor(Color.GREEN);
+                    UpdateUserGames();
+//                    refreshGames.animate().rotation(180).start();
+
+                }
+                return false;
+            }
+        });
+    }
+
+    private void UpdateUserGames(){
+        System.out.println("user selected is: "+currentUser());
+        ProcessFeed processFeed = new ProcessFeed(currentUser());
+        while(processFeed.getTotal() == 0) {
+            try {
+                processFeed.execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("feed: "+ processFeed.getTotal() +" saved: "+ userGames.size());
+        if(processFeed.getTotal() != userGames.size()){
+            dbManager = new DBManager(this,currentUser());
+            dbManager.removeGames(currentUser());
+            SaveCurrentUser saveUser = new SaveCurrentUser(currentUser(),processFeed.getboardgameList(),this);
+            try {
+                saveUser.execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }else {
+            Toast.makeText(getApplicationContext(),
+                    "No need to update both libaraies are: " +processFeed.getTotal(),
+                    Toast.LENGTH_LONG).show();
+        }
+
+    }
+    public String currentUser(){
+        return selectedUser;
+    }
+
+    private void setupArrayAdapter(){
+
+        final TextView userTotal = (TextView)findViewById(R.id.tvUserAreaTotal);
 
         ArrayAdapter<String> arrayAdapter =
                 new ArrayAdapter<String>(this,android.R.layout.simple_dropdown_item_1line,users);
@@ -71,6 +142,7 @@ public class UserAreaMainActivity extends HeaderActivity {
                     lvUserGames.setAdapter(myadapter);
 
                     userTotal.setText("Total: "+userGames.size());
+                    selectedUser = users.get(i);
 
                     Toast.makeText(getApplicationContext(),
                             users.get(i)+" has a total of: "+userGames.size(),
@@ -83,7 +155,6 @@ public class UserAreaMainActivity extends HeaderActivity {
 
             }
         });
-
     }
 
     protected ArrayList getUserGames(String user){
@@ -126,6 +197,8 @@ public class UserAreaMainActivity extends HeaderActivity {
         System.out.println(userList.toString());
         return userList;
     }
+
+
 
     private class MainListAdapter extends BaseAdapter{
         private ArrayList<String>gameList;

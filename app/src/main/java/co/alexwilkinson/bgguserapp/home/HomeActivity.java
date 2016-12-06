@@ -96,7 +96,6 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
 
             String prime = whoIsPrime();
             String[] primeArray = prime.split("\n");
-
             if(!dataArray[0].equalsIgnoreCase(primeArray[0])){
                 userRef.saveData(primeArray[0],Integer.parseInt(primeArray[1]));
             }

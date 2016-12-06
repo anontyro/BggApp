@@ -30,12 +30,11 @@
                 android:layout_weight="2" />
 
             <Button
-                android:background="#ffff"
+                android:background="@android:color/transparent"
                 android:text="@string/fa_refresh"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/buUserAreaRefresh"
-                android:layout_weight="0" />
+                android:layout_width="59dp"
+                android:layout_height="27dp"
+                android:id="@+id/buUserAreaRefresh" />
 
         </LinearLayout>
 
@@ -52,7 +51,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="TextView"
+                android:text="UserTotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvUserAreaTotal"

@@ -135,6 +135,13 @@ public class DBManager {
         return id;
     }
 
+    public void removeGames(String username){
+        sqlDB.execSQL("DELETE FROM "+tableGames + " WHERE "+colForUsername +" = "+"'" +username +"'"+ ";");
+    }
+    public void removeUser(String username){
+        sqlDB.execSQL("DELETE FROM "+tableUsers + " WHERE "+colUsername +" = "+"'" +username +"'"+ ";");
+    }
+
     /**
      * Open Method that allows for full String SQL queries to be used, returns void.
      * @param query full String SQL query
