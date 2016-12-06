@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 
 import co.alexwilkinson.bgguserapp.HeaderActivity;
 import co.alexwilkinson.bgguserapp.R;
+import co.alexwilkinson.bgguserapp.usersearch.BoardgameListItem;
 import co.alexwilkinson.bgguserapp.usersearch.ProcessFeed;
 import co.alexwilkinson.bgguserapp.usersearch.SaveCurrentUser;
 import co.alexwilkinson.bgguserapp.utilities.DBManager;
@@ -44,6 +47,7 @@ public class UserAreaMainActivity extends HeaderActivity {
     protected MainListAdapter myadapter;
     private Typeface iconFA;
     private String selectedUser= "";
+    private ProgressBar progressBar;
 
 
     @Override
@@ -60,6 +64,9 @@ public class UserAreaMainActivity extends HeaderActivity {
         lvUserGames = (ListView)findViewById(R.id.lvUserGames);
 
         refreshGames = (Button)findViewById(R.id.buUserAreaRefresh);
+
+        progressBar = (ProgressBar)findViewById(R.id.pbUserAreaMain);
+        progressBar.setVisibility(View.INVISIBLE);
 
         setupRefreshButton();
 
@@ -93,6 +100,7 @@ public class UserAreaMainActivity extends HeaderActivity {
     private void UpdateUserGames(){
         System.out.println("user selected is: "+currentUser());
         ProcessFeed processFeed = new ProcessFeed(currentUser());
+
         while(processFeed.getTotal() == 0) {
             try {
                 processFeed.execute().get();
@@ -105,15 +113,17 @@ public class UserAreaMainActivity extends HeaderActivity {
         System.out.println("feed: "+ processFeed.getTotal() +" saved: "+ userGames.size());
         if(processFeed.getTotal() != userGames.size()){
             dbManager = new DBManager(this,currentUser());
-            dbManager.removeGames(currentUser());
-            SaveCurrentUser saveUser = new SaveCurrentUser(currentUser(),processFeed.getboardgameList(),this);
+
+            final SaveCurrentUser saveUser = new SaveCurrentUser(currentUser(),processFeed.getboardgameList(),this);
             try {
+                dbManager.removeGames(currentUser());
                 saveUser.execute().get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
+
         }else {
             Toast.makeText(getApplicationContext(),
                     "No need to update both libaraies are: " +processFeed.getTotal(),

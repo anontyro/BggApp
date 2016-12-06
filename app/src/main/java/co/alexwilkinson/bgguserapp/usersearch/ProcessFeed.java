@@ -117,10 +117,17 @@ public class ProcessFeed extends AsyncTask{
                     }
                 }
                 eventType = xpp.next();
+
             }
 
         }catch(Exception ex){
             ex.getStackTrace();
+        }
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         for(int i =0; i < boardggameList.size(); i++){

@@ -46,11 +46,8 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         buUpdateUser = (Button)findViewById(R.id.buPrimeUpdate);
         buUpdateUser.setOnClickListener(this);
 
-
-
         checkPrimeUserExists();
 
-        System.out.println("who is prime "+whoIsPrime());
 
 
     }
@@ -81,30 +78,28 @@ public class HomeActivity extends HeaderActivity implements View.OnClickListener
         userData = userRef.loadData();
 
 
-        if(DBManager.databaseExists() ==true){
+        if(DBManager.databaseExists() ==true) {
             buCreateUser.setVisibility(View.GONE);
-            if(userData.contains("No user created")) {
+            if (userData.contains("No user created")) {
                 String prime = whoIsPrime();
-                String[]primeArray = prime.split("\n");
-                userRef.saveData(primeArray[0],Integer.parseInt(primeArray[1]));
+                String[] primeArray = prime.split("\n");
+                userRef.saveData(primeArray[0], Integer.parseInt(primeArray[1]));
+            }else{
+                String[] dataArray = userData.split("\n");
+                System.out.println(userData.toString());
+
+                String prime = whoIsPrime();
+                String[] primeArray = prime.split("\n");
+                if (!dataArray[0].equalsIgnoreCase(primeArray[0])) {
+                    userRef.saveData(primeArray[0], Integer.parseInt(primeArray[1]));
+                }
+
+                tvUser = (TextView) findViewById(R.id.tvUser);
+
+                tvUser.setText("Welcome back " + dataArray[0] + " you currently have " + dataArray[1]
+                        + " games in your library"
+                );
             }
-        }
-
-        if(!userData.contains("No user created")) {
-            String[]dataArray = userData.split("\n");
-            System.out.println(userData.toString());
-
-            String prime = whoIsPrime();
-            String[] primeArray = prime.split("\n");
-            if(!dataArray[0].equalsIgnoreCase(primeArray[0])){
-                userRef.saveData(primeArray[0],Integer.parseInt(primeArray[1]));
-            }
-
-            tvUser = (TextView)findViewById(R.id.tvUser);
-
-            tvUser.setText("Welcome back "+dataArray[0] + " you currently have " +dataArray[1]
-                    + " games in your library"
-            );
         }
 
         if(userData.contains("No user created")){

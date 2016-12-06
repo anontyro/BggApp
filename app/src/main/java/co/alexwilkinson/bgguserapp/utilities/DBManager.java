@@ -135,6 +135,7 @@ public class DBManager {
         return id;
     }
 
+
     public void removeGames(String username){
         sqlDB.execSQL("DELETE FROM "+tableGames + " WHERE "+colForUsername +" = "+"'" +username +"'"+ ";");
     }
