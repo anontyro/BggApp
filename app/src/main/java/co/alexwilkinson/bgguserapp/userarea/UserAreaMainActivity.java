@@ -217,7 +217,7 @@ public class UserAreaMainActivity extends HeaderActivity {
     }
 
     /*
-
+    Work over the database data of current users saved
      */
     private ArrayList<String> populateUser(String mainuser){
         ArrayList<String>userList = new ArrayList<>();
