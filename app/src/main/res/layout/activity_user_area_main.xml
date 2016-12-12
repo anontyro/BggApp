@@ -10,6 +10,16 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="co.alexwilkinson.bgguserapp.userarea.UserAreaMainActivity">
 
+    <ProgressBar
+        style="?android:attr/progressBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/pbUserAreaMain"
+        android:layout_weight="0"
+        android:layout_centerInParent="true"
+        android:indeterminate="false" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"

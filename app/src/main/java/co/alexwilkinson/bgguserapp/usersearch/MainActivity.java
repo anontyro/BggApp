@@ -63,6 +63,8 @@ public class MainActivity extends HeaderActivity
         lvCollection = (ListView) findViewById(R.id.lvCollection);
         etFindUser = (EditText) findViewById(R.id.etFindUser);
 
+        System.out.println("database exists? "+DBManager.databaseExists());
+
 
 
     }
