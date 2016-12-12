@@ -32,6 +32,10 @@ import co.alexwilkinson.bgguserapp.utilities.FontManager;
 import co.alexwilkinson.bgguserapp.utilities.UserRef;
 import co.alexwilkinson.bgguserapp.utilities.WebBrowserActivity;
 
+/**
+ * Main Class for UserArea that will display a list of all the selected users games, when the
+ * user changes so does the list and there is a refresh button to update the list and database.
+ */
 public class UserAreaMainActivity extends HeaderActivity {
     protected Spinner spUser;
     private Button refreshGames;
@@ -46,6 +50,10 @@ public class UserAreaMainActivity extends HeaderActivity {
     private String selectedUser= "";
 
 
+    /**
+     * Main create method of the class that will pull all the elements together
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +78,10 @@ public class UserAreaMainActivity extends HeaderActivity {
 
     }
 
+    /*
+    Helper method that sets up and activates the refresh button for the  user lists, will eventually
+    hopefully animate corretly.
+     */
     private void setupRefreshButton(){
         refreshGames.setTypeface(iconFA);
 
@@ -90,9 +102,13 @@ public class UserAreaMainActivity extends HeaderActivity {
         });
     }
 
+    /*
+    Method that will pull and check the user data saved locally with the data on BGG
+     */
     private void UpdateUserGames(){
         System.out.println("user selected is: "+currentUser());
         ProcessFeed processFeed = new ProcessFeed(currentUser());
+        //inital while loop will contiune until the taske is finished and data is returned
         while(processFeed.getTotal() == 0) {
             try {
                 processFeed.execute().get();
@@ -103,10 +119,13 @@ public class UserAreaMainActivity extends HeaderActivity {
             }
         }
         System.out.println("feed: "+ processFeed.getTotal() +" saved: "+ userGames.size());
+        //if statement checks to see if the feed is different or not
         if(processFeed.getTotal() != userGames.size()){
+            //what to do when the feed does not equal the saved data
             dbManager = new DBManager(this,currentUser());
             dbManager.removeGames(currentUser());
             SaveCurrentUser saveUser = new SaveCurrentUser(currentUser(),processFeed.getboardgameList(),this);
+            //try adn save the userData into the database also
             try {
                 saveUser.execute().get();
             } catch (InterruptedException e) {
@@ -115,16 +134,25 @@ public class UserAreaMainActivity extends HeaderActivity {
                 e.printStackTrace();
             }
         }else {
+            //displayed info to the user to let them know they do not need to update
             Toast.makeText(getApplicationContext(),
                     "No need to update both libaraies are: " +processFeed.getTotal(),
                     Toast.LENGTH_LONG).show();
         }
 
     }
+
+    /**
+     * Simple method to return the current User information
+     * @return
+     */
     public String currentUser(){
         return selectedUser;
     }
 
+    /*
+    Helper method that is used to setup the arrray adapter for the user select spinner
+     */
     private void setupArrayAdapter(){
 
         final TextView userTotal = (TextView)findViewById(R.id.tvUserAreaTotal);
@@ -157,9 +185,15 @@ public class UserAreaMainActivity extends HeaderActivity {
         });
     }
 
+    /**
+     * Getter method that is used to return the ArrayList with Strings of all the games
+     * @param user
+     * @return
+     */
     protected ArrayList getUserGames(String user){
         ArrayList<String> gameList = new ArrayList<>();
 
+        //return the query from the database and execute it
         Cursor cursor1 = dbManager.queryGame(null,null,null,null);
         if(cursor1.moveToFirst()){
             do{
@@ -182,6 +216,9 @@ public class UserAreaMainActivity extends HeaderActivity {
         return gameList;
     }
 
+    /*
+
+     */
     private ArrayList<String> populateUser(String mainuser){
         ArrayList<String>userList = new ArrayList<>();
         dbManager = new DBManager(this,mainuser);
